@@ -1,0 +1,33 @@
+version: "3.9"
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go_backend_tours
+    ports:
+      - "8081:8081" 
+    environment:
+      - MONGO_URI=mongodb://mongo:27017
+      - MONGO_DB=Tours
+      - MONGO_COLLECTION=Tours
+    depends_on:
+      - mongo
+    networks:
+      - tours-net
+
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - tours-net
+
+networks:
+  tours-net:
+
+volumes:
+  mongo-data:

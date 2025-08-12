@@ -40,8 +40,8 @@ func (repo *UserRepository) CreateUser(user *model.User) error {
 	return nil
 }
 
-func (repo *UserRepository) FindAll() ([]model.User, error) {
+func (repo *UserRepository) FindAllExcept(userID int) ([]model.User, error) {
 	var users []model.User
-	result := repo.DatabaseConnection.Where("role != ?", 0).Find(&users)
+	result := repo.DatabaseConnection.Where("role != ? AND id != ?", 0, userID).Find(&users)
 	return users, result.Error
 }
