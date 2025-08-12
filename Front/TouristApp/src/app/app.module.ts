@@ -1,0 +1,42 @@
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+import { AuthModule } from './auth/auth.module';
+import { NavbarComponent } from './shared/navbar/navbar.component';
+import { HttpClientModule } from '@angular/common/http';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import {  MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatCardModule } from '@angular/material/card';
+import { StakeholdersModule } from './stakeholders/stakeholders.module';
+import { UserAccountsComponent } from './stakeholders/user-accounts/user-accounts.component';
+import { ToursModule } from './tours/tours.module';
+
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptor } from './auth/interceptor-jwt/auth.interceptor';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    NavbarComponent,
+    UserAccountsComponent
+  ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    AuthModule,
+    HttpClientModule,
+    BrowserAnimationsModule,
+    MatSnackBarModule,
+    StakeholdersModule,
+    AuthModule,
+    MatCardModule,
+    ToursModule
+  ],
+  providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }

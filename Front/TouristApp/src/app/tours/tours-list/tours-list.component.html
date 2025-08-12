@@ -1,0 +1,29 @@
+<div class="container" *ngIf="!loading; else loader">
+  <mat-grid-list cols="4" rowHeight="1:1" gutterSize="20" 
+                 class="grid"
+                 *ngIf="tours.length > 0; else noTours">
+    <mat-grid-tile *ngFor="let tour of tours">
+      <mat-card class="tour-card">
+        <mat-card-header>
+          <mat-card-title>{{ tour.name }}</mat-card-title>
+          <mat-card-subtitle>#{{ tour.tags }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p><strong>Difficulty:</strong> {{ tour.difficulty }}</p>
+          <p><strong>Description:</strong> {{tour.description}}</p>
+          <p><strong>Status:</strong> {{tour.status}}</p>
+          <p><strong>Cost:</strong> {{tour.cost}}</p>
+          <p><strong>Length(in km):</strong> {{tour.tourLength}}</p>
+        </mat-card-content>
+      </mat-card>
+    </mat-grid-tile>
+  </mat-grid-list>
+</div>
+
+<ng-template #loader>
+  <div class="loader">Loading tours...</div>
+</ng-template>
+
+<ng-template #noTours>
+  <div class="no-data">You haven't any created tour</div>
+</ng-template>

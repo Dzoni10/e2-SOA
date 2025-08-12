@@ -1,0 +1,36 @@
+.container {
+  padding: 20px;
+}
+
+.grid {
+  @media (max-width: 1024px) {
+    mat-grid-list {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 600px) {
+    mat-grid-list {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+.tour-card {
+  background: linear-gradient(135deg, #9e58b1, #2575fc);
+  color: white;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  transition: transform 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+}
+
+.loader, .no-data {
+  text-align: center;
+  padding: 30px;
+  font-size: 1.2rem;
+  color: gray;
+}

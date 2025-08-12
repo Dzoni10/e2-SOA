@@ -31,6 +31,6 @@ func (s *UserService) Authenticate(username, password string) (*model.User, erro
 	return user, nil
 }
 
-func (service *UserService) GetAllUsers() ([]model.User, error) {
-	return service.Repo.FindAll()
+func (service *UserService) GetAllUsersExcept(userID int) ([]model.User, error) {
+	return service.Repo.FindAllExcept(userID)
 }

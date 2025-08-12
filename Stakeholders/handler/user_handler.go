@@ -1,14 +1,19 @@
 package handler
 
 import (
+	"bytes"
 	"database-example/auth"
 	"database-example/model"
 	"database-example/service"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/mux"
 )
 
@@ -42,6 +47,13 @@ func (handler *UserHandler) Get(writer http.ResponseWriter, req *http.Request) {
 }
 
 func (handler *UserHandler) Create(writer http.ResponseWriter, req *http.Request) {
+
+	///ISpis u konzoli vrednosti unosa fronta
+	bodyBytes, _ := ioutil.ReadAll(req.Body)
+	fmt.Println("Request body:", string(bodyBytes))
+	req.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+	/////
+
 	var user model.User
 
 	err := json.NewDecoder(req.Body).Decode(&user)
@@ -99,9 +111,11 @@ func (handler *UserHandler) Login(writer http.ResponseWriter, req *http.Request)
 	})
 }
 
-
 func (handler *UserHandler) GetAllUsers(writer http.ResponseWriter, req *http.Request) {
-	users, err := handler.UserService.GetAllUsers()
+
+	userID := handler.ExtractUserIDFromToken(req)
+
+	users, err := handler.UserService.GetAllUsersExcept(userID)
 	writer.Header().Set("Content-Type", "application/json")
 
 	if err != nil {
@@ -112,4 +126,34 @@ func (handler *UserHandler) GetAllUsers(writer http.ResponseWriter, req *http.Re
 
 	writer.WriteHeader(http.StatusOK)
 	json.NewEncoder(writer).Encode(users)
+}
+
+func (handler *UserHandler) ExtractUserIDFromToken(req *http.Request) int {
+
+	authHeader := req.Header.Get("Authorization")
+	if authHeader == "" {
+		return 0 // ili -1 ako želiš da označiš grešku
+	}
+
+	// 2. Očekujemo format "Bearer <token>"
+	parts := strings.Split(authHeader, " ")
+	if len(parts) != 2 || parts[0] != "Bearer" {
+		return 0
+	}
+	tokenString := parts[1]
+
+	// 3. Parsiraj token
+	token, err := jwt.ParseWithClaims(tokenString, &auth.Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte("secret_password_for_encoding_messages"), nil
+	})
+	if err != nil {
+		return 0
+	}
+
+	// 4. Izvuci UserId iz claims-a
+	if claims, ok := token.Claims.(*auth.Claims); ok && token.Valid {
+		return claims.UserId
+	}
+
+	return 0
 }

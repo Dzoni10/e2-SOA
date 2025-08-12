@@ -1,0 +1,9 @@
+<div class="users-container">
+  <mat-card *ngFor="let user of users" class="user-card">
+    <mat-card-title>{{ user.name }} {{ user.surname }}</mat-card-title>
+    <mat-card-content>
+      <p><strong>Username:</strong> {{ user.username }}</p>
+      <p><strong>Role:</strong> {{ getRoleName(user.role) }}</p>
+    </mat-card-content>
+  </mat-card>
+</div>

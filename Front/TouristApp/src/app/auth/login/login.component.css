@@ -1,0 +1,50 @@
+form {
+    margin-top:100px;
+    display: flex;
+    justify-content: center;
+    
+}
+
+div {
+    width: 400px;
+    display:flex;
+    flex-direction: column;
+    
+}
+
+p {
+    margin-top: 10px;
+    color:rgb(36, 28, 28)
+}
+
+a{
+    color: #5e1db9;
+}
+
+a:hover {
+    color: #76569c; /* još jači kontrast pri hoveru */
+  }
+
+:host {
+    display:grid;
+    width: 100%;
+    height: 92vh;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+  }
+
+  .form-container {
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    padding: 60px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.1); 
+    border: 1px solid rgba(16, 12, 12, 0.3); 
+    border-radius: 10px;
+    backdrop-filter: blur(6px); 
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    color: rgba(8, 8, 14, 0.37);
+  }

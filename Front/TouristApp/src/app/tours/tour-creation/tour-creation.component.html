@@ -1,0 +1,39 @@
+
+<form [formGroup]="tourCreationForm" (ngSubmit)="create()">
+    <div class="form-container">
+        <mat-form-field>
+            <mat-label>Tour name</mat-label>
+            <input matInput formControlName="name" type="text"/>
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Description</mat-label>
+            <input matInput formControlName="description" type="text"/>
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Difficulty</mat-label>
+            <mat-select formControlName="difficulty">
+                <mat-option>--</mat-option>
+                <mat-option [value]="0">Easy</mat-option>
+                <mat-option [value]="1">Medium</mat-option>
+                <mat-option [value]="2">Hard</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Tags</mat-label>
+            <mat-chip-grid #templateChipGrid aria-label="Enter template form keywords" >
+            <mat-chip-row *ngFor="let keyword of templateKeywords()" (removed)="removeTag(keyword)">
+                {{keyword}}
+                <button  matChipRemove class="tag">
+                <mat-icon>cancel</mat-icon>
+                </button>
+            </mat-chip-row>
+            </mat-chip-grid>
+            <input placeholder="New tag(type and press enter)..."
+                   [matChipInputFor]="templateChipGrid"
+                   (matChipInputTokenEnd)="addTag($event)"
+            />
+        </mat-form-field>
+
+    <button class="add-update" color="primary" type="submit" mat-raised-button>Create Tour</button>
+    </div>
+</form>
