@@ -1,0 +1,11 @@
+<div id="nav-bar"> 
+    <div class="navbar-title">TouristApp<sup>™</sup></div>
+
+    <div class="navbar-buttons">
+        <button mat-raised-button *ngIf="isLoggedIn()&&isLoggedAdmin()" class="accounts-button" [routerLink]="['accounts']">Accounts</button>
+        <button mat-raised-button *ngIf="isLoggedIn()&&isLoggedAuthor()" class="tours-button" [routerLink]="['toursList']">Tours</button>
+        <button mat-raised-button *ngIf="isLoggedIn()&&isLoggedAuthor()" class="tour-creation-button" [routerLink]="['tourCreation']">Create tour</button>
+        <button mat-raised-button *ngIf="!isLoggedIn()" class="login-button" [routerLink]="['login']">Log in</button>
+        <button mat-raised-button *ngIf="isLoggedIn()" class="logout-button" (click)="logout()">Log out</button>
+    </div>
+</div>

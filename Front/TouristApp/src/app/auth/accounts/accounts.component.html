@@ -1,0 +1,26 @@
+<div class="container" *ngIf="!loading; else loader">
+  <mat-grid-list cols="4" rowHeight="1:1" gutterSize="20" 
+                 class="grid"
+                 *ngIf="accounts.length > 0; else noAccounts">
+    <mat-grid-tile *ngFor="let account of accounts">
+      <mat-card class="account-card">
+        <mat-card-header>
+          <div mat-card-avatar class="avatar">{{ account.name[0] }}{{ account.surname[0] }}</div>
+          <mat-card-title>{{ account.name }} {{ account.surname }}</mat-card-title>
+          <mat-card-subtitle>@{{ account.username }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p><strong>Role:</strong> {{ account.role }}</p>
+        </mat-card-content>
+      </mat-card>
+    </mat-grid-tile>
+  </mat-grid-list>
+</div>
+
+<ng-template #loader>
+  <div class="loader">Loading accounts...</div>
+</ng-template>
+
+<ng-template #noAccounts>
+  <div class="no-data">There is no accounts here</div>
+</ng-template>

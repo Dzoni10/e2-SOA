@@ -1,0 +1,28 @@
+.users-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 20px;
+  justify-content: center;
+}
+
+.user-card {
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  padding: 16px;
+  width: 250px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.user-card:hover {
+  transform: scale(1.02);
+}
+
+.user-card h3 {
+  margin: 0 0 10px 0;
+}
+
+.user-card p {
+  margin: 5px 0;
+}
