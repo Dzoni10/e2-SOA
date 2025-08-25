@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
+import { MarkdownModule } from 'ngx-markdown';
 
 @NgModule({
   declarations: [
@@ -25,7 +26,9 @@ import { MatGridListModule } from '@angular/material/grid-list';
     MatIconModule,
     ReactiveFormsModule,
     MatCardModule,
-    MatGridListModule
+    MatGridListModule,
+    MarkdownModule.forRoot()
+
   ]
 })
 export class BlogsModule { }
