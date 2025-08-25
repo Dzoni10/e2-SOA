@@ -5,13 +5,20 @@
             <input matInput formControlName="title" type="text"/>
         </mat-form-field>
         
-        <mat-form-field>
-            <mat-label>Content (Markdown supported)</mat-label>
-            <textarea matInput formControlName="description" 
-                      rows="8" 
-                      placeholder="Write your blog content here. You can use markdown formatting like **bold** and # headers">
-            </textarea>
-        </mat-form-field>
+  <mat-form-field>
+  <mat-label>Content (Markdown supported)</mat-label>
+  <textarea matInput 
+            formControlName="description" 
+            rows="8" 
+            placeholder="Write your blog content here. You can use markdown formatting like **bold** and # headers">
+  </textarea>
+</mat-form-field>
+
+<!-- Preview Markdown -->
+<div class="markdown-preview" *ngIf="blogCreationForm.get('description')?.value">
+  <h4>Preview:</h4>
+  <markdown [data]="blogCreationForm.get('description')?.value"></markdown>
+</div>
 
         <mat-form-field>
             <mat-label>Images (URLs)</mat-label>

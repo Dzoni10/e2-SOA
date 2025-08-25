@@ -10,7 +10,7 @@
         </mat-card-header>
         
         <mat-card-content>
-          <p class="blog-preview">{{ getPreview(blog.description) }}</p>
+           <markdown [data]="blog.description"></markdown>
           
           <div class="images-container" *ngIf="blog.images && blog.images.length > 0">
             <img *ngFor="let image of blog.images.slice(0, 2)" 
