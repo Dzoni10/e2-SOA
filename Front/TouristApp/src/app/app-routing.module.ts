@@ -6,6 +6,8 @@ import { UserAccountsComponent } from './stakeholders/user-accounts/user-account
 import { TourCreationComponent } from './tours/tour-creation/tour-creation.component';
 import { AccountsComponent } from './auth/accounts/accounts.component';
 import { ToursListComponent } from './tours/tours-list/tours-list.component';
+import { BlogCreationComponent } from './blogs/blog-creation/blog-creation.component';
+import { BlogsListComponent } from './blogs/blogs-list/blogs-list.component';
 
 const routes: Routes = [
   {path: 'login', component:LoginComponent},
@@ -13,7 +15,9 @@ const routes: Routes = [
   {path: 'userAccounts', component: UserAccountsComponent},
   {path: 'tourCreation', component: TourCreationComponent},
   {path: 'accounts', component:AccountsComponent},
-  {path: 'toursList', component: ToursListComponent}
+  {path: 'toursList', component: ToursListComponent},
+  {path: 'blogCreation', component: BlogCreationComponent},
+  {path: 'blogsList', component: BlogsListComponent}
 ];
 
 @NgModule({

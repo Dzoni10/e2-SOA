@@ -106,6 +106,44 @@
     box-shadow: none ;
 }
 
+.blogs-button{
+    background-color:#412fb7;
+    color:  #f7f6f5;
+    box-shadow: none ;
+    border: 2px solid #1a105d ;
+    border-radius: 10px ;
+    font-family: 'Lulo Clean', serif;
+    font-size: 10px;
+    height: 5vh;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.blogs-button:hover{
+    background-color: #6354c7 ;
+    color: #becbd2 ;
+    box-shadow: none ;
+}
+
+.blog-creation-button{
+    background-color:#412fb7;
+    color:  #f7f6f5;
+    box-shadow: none ;
+    border: 2px solid #1a105d ;
+    border-radius: 10px ;
+    font-family: 'Lulo Clean', serif;
+    font-size: 10px;
+    height: 5vh;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.blog-creation-button:hover{
+    background-color: #6354c7 ;
+    color: #becbd2 ;
+    box-shadow: none ;
+}
+
 .tours-button{
     background-color:#412fb7;
     color:  #f7f6f5;
