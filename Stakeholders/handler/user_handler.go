@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"database-example/auth"
+	"database-example/dto"
 	"database-example/model"
 	"database-example/service"
 	"encoding/json"
@@ -54,13 +55,21 @@ func (handler *UserHandler) Create(writer http.ResponseWriter, req *http.Request
 	req.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
 	/////
 
-	var user model.User
+	var userDTO dto.CreateUserDTO
 
-	err := json.NewDecoder(req.Body).Decode(&user)
+	err := json.NewDecoder(req.Body).Decode(&userDTO)
 
 	if err != nil {
 		writer.WriteHeader(http.StatusBadRequest)
 		return
+	}
+
+	user := model.User{
+		Name:     userDTO.Name,
+		Surname:  userDTO.Surname,
+		Username: userDTO.Username,
+		Password: userDTO.Password, // ovde lepo setuješ
+		Role:     model.Role(userDTO.Role),
 	}
 
 	err = handler.UserService.Create(&user)
@@ -78,7 +87,7 @@ func (handler *UserHandler) Login(writer http.ResponseWriter, req *http.Request)
 
 	var ceredentials struct {
 		Username string `json:"username"`
-		Password string
+		Password string `json:"password"`
 	}
 
 	err := json.NewDecoder(req.Body).Decode(&ceredentials)
