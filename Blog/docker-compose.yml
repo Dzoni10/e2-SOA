@@ -1,0 +1,33 @@
+version: "3.9"
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go_backend_blogs
+    ports:
+      - "8082:8082" 
+    environment:
+      - MONGO_URI=mongodb://mongo_blogs:27017
+      - MONGO_DB=Blogs
+      - MONGO_COLLECTION=Blogs
+    depends_on:
+      - mongo_blogs
+    networks:
+      - blogs-net
+
+  mongo_blogs:
+    image: mongo:6
+    container_name: mongo_blogs
+    ports:
+      - "27018:27017"
+    volumes:
+      - blog-mongo-data:/data/db
+    networks:
+      - blogs-net
+
+networks:
+  blogs-net:
+
+volumes:
+  blog-mongo-data:

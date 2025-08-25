@@ -1,0 +1,38 @@
+<div class="container" *ngIf="!loading; else loader">
+  <mat-grid-list cols="3" rowHeight="2:3" gutterSize="20" 
+                 class="grid"
+                 *ngIf="blogs.length > 0; else noBlogs">
+    <mat-grid-tile *ngFor="let blog of blogs">
+      <mat-card class="blog-card">
+        <mat-card-header>
+          <mat-card-title>{{ blog.title }}</mat-card-title>
+          <mat-card-subtitle>{{ blog.createdAt | date:'short' }}</mat-card-subtitle>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <p class="blog-preview">{{ getPreview(blog.description) }}</p>
+          
+          <div class="images-container" *ngIf="blog.images && blog.images.length > 0">
+            <img *ngFor="let image of blog.images.slice(0, 2)" 
+                 [src]="image" 
+                 alt="Blog image"
+                 class="blog-image"
+                 (error)="onImageError($event)">
+            <span *ngIf="blog.images.length > 2" class="more-images">
+              +{{ blog.images.length - 2 }} more
+            </span>
+          </div>
+          Creator id: {{blog.creatorID}}
+        </mat-card-content>
+      </mat-card>
+    </mat-grid-tile>
+  </mat-grid-list>
+</div>
+
+<ng-template #loader>
+  <div class="loader">Loading blogs...</div>
+</ng-template>
+
+<ng-template #noBlogs>
+  <div class="no-data">No blogs found</div>
+</ng-template>
