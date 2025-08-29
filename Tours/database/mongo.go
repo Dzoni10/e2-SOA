@@ -17,20 +17,20 @@ var TourCollection *mongo.Collection
 func Init() {
 	uri := os.Getenv("MONGO_URI")
 
-	if uri == "" {
-		uri = "mongodb://localhost:27017"
-	}
+	// if uri == "" {
+	// 	uri = "mongodb://localhost:27017"
+	// }
 
 	dbName := os.Getenv("MONGO_DB")
 
-	if dbName == "" {
-		dbName = "Tours"
-	}
+	// if dbName == "" {
+	// 	dbName = "Tours"
+	// }
 
 	collName := os.Getenv("MONGO_COLLECTION")
-	if collName == "" {
-		collName = "Tours"
-	}
+	// if collName == "" {
+	// 	collName = "Tours"
+	// }
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
