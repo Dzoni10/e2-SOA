@@ -5,37 +5,62 @@
             <input matInput formControlName="title" type="text"/>
         </mat-form-field>
         
-  <mat-form-field>
-  <mat-label>Content (Markdown supported)</mat-label>
-  <textarea matInput 
-            formControlName="description" 
-            rows="8" 
-            placeholder="Write your blog content here. You can use markdown formatting like **bold** and # headers">
-  </textarea>
-</mat-form-field>
-
-<!-- Preview Markdown -->
-<div class="markdown-preview" *ngIf="blogCreationForm.get('description')?.value">
-  <h4>Preview:</h4>
-  <markdown [data]="blogCreationForm.get('description')?.value"></markdown>
-</div>
-
         <mat-form-field>
-            <mat-label>Images (URLs)</mat-label>
-            <mat-chip-grid #imageChipGrid aria-label="Enter image URLs">
-                <mat-chip-row *ngFor="let imageUrl of templateImages()" (removed)="removeImage(imageUrl)">
-                    {{imageUrl}}
-                    <button matChipRemove class="image">
-                        <mat-icon>cancel</mat-icon>
-                    </button>
-                </mat-chip-row>
-            </mat-chip-grid>
-            <input placeholder="Add image URL (press enter)..."
-                   [matChipInputFor]="imageChipGrid"
-                   (matChipInputTokenEnd)="addImage($event)"
-            />
+            <mat-label>Content (Markdown supported)</mat-label>
+            <textarea matInput 
+                      formControlName="description" 
+                      rows="8" 
+                      placeholder="Write your blog content here. You can use markdown formatting like **bold** and # headers">
+            </textarea>
         </mat-form-field>
 
-        <button class="add-update" color="primary" type="submit" mat-raised-button>Create Blog</button>
+        <!-- Preview Markdown -->
+        <div class="markdown-preview" *ngIf="blogCreationForm.get('description')?.value">
+            <h4>Preview:</h4>
+            <markdown [data]="blogCreationForm.get('description')?.value"></markdown>
+        </div>
+
+        <!-- IZMENA: File input umesto URL input-a -->
+        <mat-form-field>
+            <mat-label>Images from computer</mat-label>
+            <input type="file" 
+                   #fileInput
+                   multiple 
+                   accept="image/*"
+                   (change)="onFileSelect($event)"
+                   style="display: none;">
+            <input matInput 
+                   readonly
+                   [value]="getSelectedFilesText()"
+                   (click)="fileInput.click()"
+                   placeholder="Click to select images from your computer">
+        </mat-form-field>
+
+        <!-- Prikaz odabranih slika -->
+        <div *ngIf="selectedFiles.length > 0" class="selected-images">
+            <h4>Selected images:</h4>
+            <div class="images-preview">
+                <div *ngFor="let file of selectedFiles; let i = index" class="image-preview-item">
+                    <img [src]="getFilePreview(file)" alt="Preview" class="preview-image">
+                    <div class="image-info">
+                        <span>{{file.name}}</span>
+                        <button type="button" 
+                                mat-icon-button 
+                                color="warn" 
+                                (click)="removeFile(i)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="add-update" 
+                color="primary" 
+                type="submit" 
+                mat-raised-button 
+                [disabled]="isSubmitting">
+            {{isSubmitting ? 'Creating...' : 'Create Blog'}}
+        </button>
     </div>
 </form>

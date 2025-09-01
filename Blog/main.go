@@ -28,6 +28,7 @@ func main() {
 	r.HandleFunc("/blogs/{id}", blogHandler.GetBlog).Methods("GET")
 	r.HandleFunc("/blogs", blogHandler.CreateBlog).Methods("POST")
 	r.HandleFunc("/blogs/creator/{creatorId}", blogHandler.GetBlogsByCreator).Methods("GET")
+	r.HandleFunc("/uploads/images/{filename}", blogHandler.ServeImage).Methods("GET")
 
 	corsHandler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:4200"},

@@ -29,7 +29,6 @@ export class BlogsListComponent implements OnInit {
         return;
     }
 
-    // Get all blogs (not just user's blogs like in tours)
     this.blogService.getAllBlogs().subscribe({
       next: (data) => {
         this.blogs = data;
@@ -52,6 +51,10 @@ export class BlogsListComponent implements OnInit {
       .replace(/\[(.*?)\]\(.*?\)/g, '$1'); // Remove links
     
     return plainText.length > 100 ? plainText.substring(0, 100) + '...' : plainText;
+  }
+
+  getImageUrl(imagePath: string): string {
+    return this.blogService.getImageUrl(imagePath);
   }
 
   onImageError(event: any): void {

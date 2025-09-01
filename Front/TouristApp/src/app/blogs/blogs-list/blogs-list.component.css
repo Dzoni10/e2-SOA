@@ -42,23 +42,30 @@
 
 .images-container {
   display: flex;
-  gap: 5px;
+  gap: 10px;
   align-items: center;
   margin-top: auto;
+  flex-wrap: wrap;
 }
 
 .blog-image {
-  width: 40px;
-  height: 40px;
+  width: 100px;         
+  height: 100px;       
   border-radius: 8px;
   object-fit: cover;
   border: 2px solid rgba(255,255,255,0.3);
+  transition: transform 0.2s ease;
+}
+
+.blog-image:hover {
+  transform: scale(1.1); 
 }
 
 .more-images {
   font-size: 0.8rem;
   opacity: 0.8;
   margin-left: 5px;
+  white-space: nowrap;   
 }
 
 .loader, .no-data {
@@ -66,4 +73,26 @@
   padding: 30px;
   font-size: 1.2rem;
   color: gray;
+}
+
+@media (max-width: 768px) {
+  .blog-image {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .images-container {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .blog-image {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .images-container {
+    gap: 6px;
+  }
 }

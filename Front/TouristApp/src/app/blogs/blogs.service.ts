@@ -16,6 +16,20 @@ export class BlogsService {
     return this.http.post<Blog>(this.apiUrl, blog);
   }
 
+  createBlogWithImages(blogData: Omit<Blog, 'id' | 'createdAt' | 'images'>, images: File[]): Observable<Blog> {
+    const formData = new FormData();
+    
+    formData.append('title', blogData.title);
+    formData.append('description', blogData.description);
+    formData.append('creatorID', blogData.creatorID.toString());
+    
+    for (let i = 0; i < images.length; i++) {
+      formData.append('images', images[i]);
+    }
+    
+    return this.http.post<Blog>(this.apiUrl, formData);
+  }
+
   getAllBlogs(): Observable<Blog[]>{
     return this.http.get<Blog[]>(`${this.apiUrl}/all`);
   }
@@ -26,5 +40,9 @@ export class BlogsService {
 
   getBlog(id: string): Observable<Blog>{
     return this.http.get<Blog>(`${this.apiUrl}/${id}`);
+  }
+
+  getImageUrl(imagePath: string): string {
+    return `http://localhost:8082${imagePath}`;
   }
 }
