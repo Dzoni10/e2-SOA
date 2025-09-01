@@ -15,8 +15,9 @@ import { AuthService } from 'src/app/auth/auth.service';
 export class BlogCreationComponent implements OnInit {
 
   blogCreationForm!: FormGroup;
-  imageList: string[] = [];
-  readonly templateImages = signal(this.imageList);
+  
+  selectedFiles: File[] = [];
+  isSubmitting = false;
 
   constructor(
     private fb: FormBuilder, 
@@ -37,9 +38,32 @@ export class BlogCreationComponent implements OnInit {
     this.blogCreationForm = this.fb.group({
       title: ['', Validators.required],
       description: ['', Validators.required],
-      images: [[]],
       creatorID: [Number(user.userId)]
     });
+  }
+
+  onFileSelect(event: any): void {
+    const files = event.target.files;
+    if (files) {
+      for (let i = 0; i < files.length; i++) {
+        this.selectedFiles.push(files[i]);
+      }
+    }
+  }
+
+  removeFile(index: number): void {
+    this.selectedFiles.splice(index, 1);
+  }
+
+  getSelectedFilesText(): string {
+    if (this.selectedFiles.length === 0) {
+      return '';
+    }
+    return `${this.selectedFiles.length} file(s) selected`;
+  }
+
+  getFilePreview(file: File): string {
+    return URL.createObjectURL(file);
   }
 
   create(): void {
@@ -48,44 +72,30 @@ export class BlogCreationComponent implements OnInit {
       return;
     }
 
-    const newBlog: Blog = {
-      ...this.blogCreationForm.value,
-      images: this.imageList
+    if (this.isSubmitting) return;
+
+    this.isSubmitting = true;
+
+    const blogData: Omit<Blog, 'id' | 'createdAt' | 'images'> = {
+      title: this.blogCreationForm.value.title,
+      description: this.blogCreationForm.value.description,
+      creatorID: this.blogCreationForm.value.creatorID
     };
 
-    this.blogService.createBlog(newBlog).subscribe({
-      next: () => {
+    this.blogService.createBlogWithImages(blogData, this.selectedFiles).subscribe({
+      next: (createdBlog) => {
         this.snackBar.open("Blog created successfully", "Close", {duration: 3000, horizontalPosition: "center"});
         this.blogCreationForm.reset();
-        this.imageList = [];
-        this.templateImages.set([]);
+        this.selectedFiles = [];
+        this.isSubmitting = false;
         this.router.navigate(['/blogsList']);
       },
       error: (err) => {
         console.error('Error creating blog', err);
         this.snackBar.open("Cannot create blog!", "Close", {duration: 3000, horizontalPosition: "center"});
+        this.isSubmitting = false;
       }
     });
   }
 
-  addImage(event: MatChipInputEvent): void {
-    const value = (event.value || '').trim();
-
-    if (value) {
-      this.templateImages.update(images => [...images, value]);
-      this.imageList.push(value);
-    }
-    event.chipInput!.clear();
-  }
-
-  removeImage(imageUrl: string) {
-    this.templateImages.update(images => {
-      const index = images.indexOf(imageUrl);
-      if (index >= 0) {
-        images.splice(index, 1);
-        this.imageList = images;
-      }
-      return [...images];
-    });
-  }
 }

@@ -13,8 +13,8 @@
            <markdown [data]="blog.description"></markdown>
           
           <div class="images-container" *ngIf="blog.images && blog.images.length > 0">
-            <img *ngFor="let image of blog.images.slice(0, 2)" 
-                 [src]="image" 
+            <img *ngFor="let imagePath of blog.images.slice(0, 2)" 
+                 [src]="getImageUrl(imagePath)" 
                  alt="Blog image"
                  class="blog-image"
                  (error)="onImageError($event)">

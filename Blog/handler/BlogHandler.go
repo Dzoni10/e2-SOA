@@ -3,13 +3,16 @@ package handler
 import (
 	"blogs/model"
 	"blogs/service"
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -17,6 +20,14 @@ import (
 
 type BlogHandler struct {
 	Service *service.BlogService
+}
+
+func createImagesDir() error {
+	imagesDir := "./uploads/images"
+	if _, err := os.Stat(imagesDir); os.IsNotExist(err) {
+		return os.MkdirAll(imagesDir, 0755)
+	}
+	return nil
 }
 
 func (h *BlogHandler) GetAllBlogs(w http.ResponseWriter, r *http.Request) {
@@ -58,29 +69,151 @@ func (h *BlogHandler) GetBlog(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *BlogHandler) CreateBlog(w http.ResponseWriter, r *http.Request) {
-	// Debug: print request body
-	bodyBytes, _ := ioutil.ReadAll(r.Body)
-	fmt.Println("Request body:", string(bodyBytes))
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
-
-	var blog model.Blog
-
-	err := json.NewDecoder(r.Body).Decode(&blog)
-	if err != nil {
-		log.Println("Error decoding blog: ", err)
-		http.Error(w, "Invalid request body: ", http.StatusBadRequest)
-		w.WriteHeader(http.StatusBadRequest)
+	if err := createImagesDir(); err != nil {
+		http.Error(w, "Failed to create upload directory", http.StatusInternalServerError)
 		return
 	}
 
+	// Parse multipart form (max 50MB za više slika)
+	if err := r.ParseMultipartForm(50 << 20); err != nil {
+		http.Error(w, "Unable to parse form", http.StatusBadRequest)
+		return
+	}
+
+	var blog model.Blog
+
+	blog.Title = r.FormValue("title")
+	blog.Description = r.FormValue("description")
+
+	creatorIDStr := r.FormValue("creatorID")
+	if creatorIDStr == "" {
+		http.Error(w, "Creator ID is required", http.StatusBadRequest)
+		return
+	}
+
+	creatorID, err := strconv.Atoi(creatorIDStr)
+	if err != nil {
+		http.Error(w, "Invalid creator ID format", http.StatusBadRequest)
+		return
+	}
+	blog.CreatorID = creatorID
+
+	// Validacija osnovnih podataka
+	if blog.Title == "" || blog.Description == "" {
+		http.Error(w, "Title and description are required", http.StatusBadRequest)
+		return
+	}
+
+	// Generiranje ID-a za blog (potrebno za naziv slika)
+	blog.ID = primitive.NewObjectID()
+
+	// Procesiranje slika ako postoje
+	var imageURLs []string
+
+	// Dobijanje svih fajlova sa ključem "images"
+	if files := r.MultipartForm.File["images"]; len(files) > 0 {
+		log.Printf("Processing %d images", len(files))
+
+		for i, fileHeader := range files {
+			file, err := fileHeader.Open()
+			if err != nil {
+				log.Printf("Error opening file %d: %v", i, err)
+				continue
+			}
+
+			allowedTypes := map[string]bool{
+				"image/jpeg": true,
+				"image/jpg":  true,
+				"image/png":  true,
+				"image/gif":  true,
+				"image/webp": true,
+			}
+
+			contentType := fileHeader.Header.Get("Content-Type")
+			if !allowedTypes[contentType] {
+				file.Close()
+				log.Printf("Invalid file type: %s", contentType)
+				continue
+			}
+
+			// Generiranje jedinstvenog imena fajla
+			timestamp := time.Now().Unix()
+			fileExt := filepath.Ext(fileHeader.Filename)
+			fileName := fmt.Sprintf("%s_%d_%d%s", blog.ID.Hex(), timestamp, i, fileExt)
+
+			// Kreiranje putanje do fajla
+			filePath := filepath.Join("./uploads/images", fileName)
+
+			// Kreiranje fajla na serveru
+			dst, err := os.Create(filePath)
+			if err != nil {
+				file.Close()
+				log.Printf("Unable to create file %s: %v", fileName, err)
+				continue
+			}
+
+			// Kopiranje sadržaja uploaded fajla u novi fajl
+			if _, err := io.Copy(dst, file); err != nil {
+				file.Close()
+				dst.Close()
+				os.Remove(filePath) // Obriši neuspešno kreiran fajl
+				log.Printf("Unable to save file %s: %v", fileName, err)
+				continue
+			}
+
+			file.Close()
+			dst.Close()
+
+			// Dodavanje URL-a slike u niz
+			imageURL := fmt.Sprintf("/uploads/images/%s", fileName)
+			imageURLs = append(imageURLs, imageURL)
+		}
+	}
+
+	blog.Images = imageURLs
+
 	if err := h.Service.CreateBlog(&blog); err != nil {
+		// Ako ne možemo da kreiramo blog, obriši sve uploadovane slike
+		for _, imageURL := range imageURLs {
+			filename := filepath.Base(imageURL)
+			filePath := filepath.Join("./uploads/images", filename)
+			os.Remove(filePath)
+		}
+
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to create blog"})
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(blog)
+}
+
+// Serviranje statičkih fajlova (slika)
+func (h *BlogHandler) ServeImage(w http.ResponseWriter, r *http.Request) {
+	filename := mux.Vars(r)["filename"]
+	if filename == "" {
+		http.Error(w, "Filename is required", http.StatusBadRequest)
+		return
+	}
+
+	// Validacija filename-a (sprečavanje directory traversal)
+	if strings.Contains(filename, "..") || strings.Contains(filename, "/") {
+		http.Error(w, "Invalid filename", http.StatusBadRequest)
+		return
+	}
+
+	filePath := filepath.Join("./uploads/images", filename)
+
+	// Proverava da li fajl postoji
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		http.Error(w, "Image not found", http.StatusNotFound)
+		return
+	}
+
+	// Serviranje fajla
+	http.ServeFile(w, r, filePath)
 }
 
 func (h *BlogHandler) GetBlogsByCreator(w http.ResponseWriter, r *http.Request) {
