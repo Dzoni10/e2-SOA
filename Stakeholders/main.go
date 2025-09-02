@@ -3,6 +3,7 @@ package main
 import (
 	"database-example/database"
 	"database-example/handler"
+	"database-example/model"
 	"database-example/repo"
 	"database-example/service"
 	"log"
@@ -18,6 +19,8 @@ func main() {
 	repository := &repo.UserRepository{DatabaseConnection: database.DB}
 	userService := &service.UserService{Repo: repository}
 	userHandler := &handler.UserHandler{UserService: userService}
+
+	database.DB.AutoMigrate(&model.User{})
 
 	router := mux.NewRouter()
 	router.HandleFunc("/users/all", userHandler.GetAllUsers).Methods("GET")
