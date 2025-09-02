@@ -24,6 +24,9 @@ func main() {
 	commentSrv := &service.CommentService{Repo: commentRepo}
 	commentHandler := &handler.CommentHandler{Service: commentSrv}
 
+	likeSrv := &service.LikeService{}
+	likeHandler := &handler.LikeHandler{Service: likeSrv}
+
 	r := mux.NewRouter()
 
 	// Blogs routes
@@ -35,6 +38,10 @@ func main() {
 
 	r.HandleFunc("/blogs/{id}/comments", commentHandler.GetComments).Methods("GET")
 	r.HandleFunc("/blogs/{id}/comments", commentHandler.AddComment).Methods("POST")
+	r.HandleFunc("/blogs/{id}/likes", likeHandler.LikeBlog).Methods("POST")
+	r.HandleFunc("/blogs/{id}/likes", likeHandler.UnlikeBlog).Methods("DELETE")
+	r.HandleFunc("/blogs/{id}/likes/count", likeHandler.CountLikes).Methods("GET")
+	r.HandleFunc("/blogs/{id}/likes/{userId}", likeHandler.HasUserLiked).Methods("GET")
 
 	corsHandler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:4200"},
