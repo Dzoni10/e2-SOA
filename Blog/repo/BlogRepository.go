@@ -69,3 +69,61 @@ func (r *BlogRepository) FindByCreatorID(creatorID int) ([]model.Blog, error) {
 	}
 	return blogs, nil
 }
+func (r *BlogRepository) UpdateBlog(blogID primitive.ObjectID, updatedBlog *model.Blog) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	update := bson.M{
+		"$set": bson.M{
+			"title":       updatedBlog.Title,
+			"description": updatedBlog.Description,
+			"images":      updatedBlog.Images,
+		},
+	}
+
+	_, err := database.BlogCollection.UpdateOne(
+		ctx,
+		bson.M{"_id": blogID},
+		update,
+	)
+
+	return err
+}
+
+func (r *BlogRepository) AddImageToBlog(blogID primitive.ObjectID, imageURL string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	update := bson.M{
+		"$push": bson.M{
+			"images": imageURL,
+		},
+	}
+
+	_, err := database.BlogCollection.UpdateOne(
+		ctx,
+		bson.M{"_id": blogID},
+		update,
+	)
+
+	return err
+}
+
+func (r *BlogRepository) RemoveImageFromBlog(blogID primitive.ObjectID, imageURL string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	update := bson.M{
+		"$pull": bson.M{
+			"images": imageURL,
+		},
+	}
+
+	_, err := database.BlogCollection.UpdateOne(
+		ctx,
+		bson.M{"_id": blogID},
+		update,
+	)
+
+	return err
+}

@@ -13,12 +13,14 @@ import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MarkdownModule } from 'ngx-markdown';
 import { RouterModule } from '@angular/router';
+import { BlogEditComponent } from './blog-edit/blog-edit.component'; // DODANO
 
 @NgModule({
   declarations: [
     BlogCreationComponent,
     BlogsListComponent,
-    BlogCommentsComponent
+    BlogCommentsComponent,
+    BlogEditComponent
   ],
   imports: [
     CommonModule,

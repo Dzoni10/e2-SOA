@@ -7,7 +7,10 @@
         <mat-card-header>
           <mat-card-title>{{ blog.title }}</mat-card-title>
           <mat-card-subtitle>{{ blog.createdAt | date:'short' }}</mat-card-subtitle>
-          <button [routerLink]="['/blogs', blog.id, 'comments']">View Comments</button>
+          <button [routerLink]="['/blogs', blog.id, 'comments']" mat-button class="comments-btn">
+            <mat-icon>comment</mat-icon>
+            View Comments
+          </button>
         </mat-card-header>
         
         <mat-card-content>
@@ -24,14 +27,27 @@
             </span>
           </div>
 
-          <p>Creator id: {{blog.creatorID}}</p>
+          <div class="blog-meta">
+            <p>Creator id: {{blog.creatorID}}</p>
 
-          <!-- 🔹 Dugme za lajk -->
-          <button mat-button color="warn" (click)="toggleLike(blog)">
-            <mat-icon>{{ blog.likedByUser ? 'favorite' : 'favorite_border' }}</mat-icon>
-            {{ blog.likesCount || 0 }}
-          </button>
+            <!-- Dugme za lajk -->
+            <button mat-button color="warn" (click)="toggleLike(blog)" class="like-btn">
+              <mat-icon>{{ blog.likedByUser ? 'favorite' : 'favorite_border' }}</mat-icon>
+              {{ blog.likesCount || 0 }}
+            </button>
+          </div>
         </mat-card-content>
+
+        <!-- NOVO: Edit dugme samo za vlasnika bloga -->
+        <mat-card-actions *ngIf="canEditBlog(blog)" class="edit-actions">
+          <button mat-raised-button 
+                  color="primary" 
+                  (click)="editBlog(blog.id!)"
+                  class="edit-button">
+            <mat-icon>edit</mat-icon>
+            Edit
+          </button>
+        </mat-card-actions>
       </mat-card>
     </mat-grid-tile>
   </mat-grid-list>
