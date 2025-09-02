@@ -96,3 +96,50 @@
     gap: 6px;
   }
 }
+.edit-actions {
+  padding: 8px 16px;
+  margin-top: auto;
+  border-top: 1px solid rgba(255,255,255,0.2);
+}
+
+.edit-button {
+  background-color: rgba(255,255,255,0.2);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.3);
+  font-size: 0.8rem;
+  
+  &:hover {
+    background-color: rgba(255,255,255,0.3);
+  }
+}
+
+.edit-button mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+}
+
+.loader, .no-data {
+  text-align: center;
+  padding: 30px;
+  font-size: 1.2rem;
+  color: gray;
+}
+
+/* Responsive stilovi */
+@media (max-width: 768px) {
+  .blog-image {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .images-container {
+    gap: 8px;
+  }
+  
+  .edit-button, .comments-btn, .like-btn {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
+}

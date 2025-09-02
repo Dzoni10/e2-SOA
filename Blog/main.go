@@ -35,6 +35,9 @@ func main() {
 	r.HandleFunc("/blogs", blogHandler.CreateBlog).Methods("POST")
 	r.HandleFunc("/blogs/creator/{creatorId}", blogHandler.GetBlogsByCreator).Methods("GET")
 	r.HandleFunc("/uploads/images/{filename}", blogHandler.ServeImage).Methods("GET")
+	r.HandleFunc("/blogs/{id}", blogHandler.UpdateBlog).Methods("PUT")
+	r.HandleFunc("/blogs/{id}/add-image", blogHandler.AddImageToBlog).Methods("POST")
+	r.HandleFunc("/blogs/{id}/remove-image", blogHandler.RemoveImageFromBlog).Methods("DELETE")
 
 	r.HandleFunc("/blogs/{id}/comments", commentHandler.GetComments).Methods("GET")
 	r.HandleFunc("/blogs/{id}/comments", commentHandler.AddComment).Methods("POST")

@@ -4,6 +4,7 @@ import { BlogsService } from '../blogs.service';
 import { LikeService } from '../like.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-blogs-list',
@@ -14,17 +15,21 @@ export class BlogsListComponent implements OnInit {
 
   blogs: Blog[] = [];
   loading = true;
+  currentUser: any;
 
   constructor(
     private blogService: BlogsService, 
     private authService: AuthService,
     private likeService: LikeService, 
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+        private router: Router
+
   ) {}
 
   ngOnInit(): void {
     const user = this.authService.getCurrentUser();
-    
+    this.currentUser = this.authService.getCurrentUser();
+
     if (!user || !user.userId) {
       this.snackBar.open("You must be logged in to see blogs", "Close", {duration: 3000, horizontalPosition: "center"});
       this.loading = false;
@@ -100,5 +105,17 @@ export class BlogsListComponent implements OnInit {
     this.likeService.countLikes(blog.id!).subscribe(res => {
       blog.likesCount = res.count;
     });
+  }
+
+  // NOVA metoda: Proverava da li korisnik može da edituje blog
+  canEditBlog(blog: Blog): boolean {
+    return this.currentUser && 
+           this.currentUser.userId && 
+           blog.creatorID === Number(this.currentUser.userId);
+  }
+
+  // NOVA metoda: Navigacija na edit stranicu
+  editBlog(blogId: string): void {
+    this.router.navigate(['/blogs/edit', blogId]);
   }
 }

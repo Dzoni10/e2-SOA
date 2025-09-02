@@ -26,3 +26,14 @@ func (s *BlogService) CreateBlog(blog *model.Blog) error {
 func (s *BlogService) GetBlogsByCreator(creatorID int) ([]model.Blog, error) {
 	return s.Repo.FindByCreatorID(creatorID)
 }
+func (s *BlogService) UpdateBlog(blogID primitive.ObjectID, updatedBlog *model.Blog) error {
+	return s.Repo.UpdateBlog(blogID, updatedBlog)
+}
+
+func (s *BlogService) AddImageToBlog(blogID primitive.ObjectID, imageURL string) error {
+	return s.Repo.AddImageToBlog(blogID, imageURL)
+}
+
+func (s *BlogService) RemoveImageFromBlog(blogID primitive.ObjectID, imageURL string) error {
+	return s.Repo.RemoveImageFromBlog(blogID, imageURL)
+}

@@ -1,0 +1,112 @@
+<div class="container" *ngIf="!loading">
+  <form [formGroup]="editForm" (ngSubmit)="updateBlog()" *ngIf="blog" class="edit-form">
+    <h2>Edit Blog</h2>
+    
+    <div class="form-container">
+      <mat-form-field>
+        <mat-label>Blog Title</mat-label>
+        <input matInput formControlName="title" type="text"/>
+      </mat-form-field>
+      
+      <mat-form-field>
+        <mat-label>Content (Markdown supported)</mat-label>
+        <textarea matInput 
+                  formControlName="description" 
+                  rows="8" 
+                  placeholder="Write your blog content here...">
+        </textarea>
+      </mat-form-field>
+
+      <!-- Preview Markdown -->
+      <div class="markdown-preview" *ngIf="editForm.get('description')?.value">
+        <h4>Preview:</h4>
+        <markdown [data]="editForm.get('description')?.value"></markdown>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" 
+                class="add-update"
+                mat-raised-button 
+                color="primary" 
+                [disabled]="editForm.invalid || isUpdating">
+          {{isUpdating ? 'Updating...' : 'Update Blog'}}
+        </button>
+        
+        <button type="button" 
+                mat-raised-button 
+                class="cancel-btn"
+                (click)="cancel()">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Upravljanje slikama -->
+  <div class="images-section" *ngIf="blog">
+    <h3>Manage Images</h3>
+    
+    <!-- Postojeće slike -->
+    <div class="existing-images" *ngIf="blog.images && blog.images.length > 0">
+      <h4>Current Images:</h4>
+      <div class="images-grid">
+        <div *ngFor="let imagePath of blog.images" class="image-item">
+          <img [src]="getImageUrl(imagePath)" alt="Blog image" class="image-thumbnail">
+          <button mat-icon-button 
+                  color="warn" 
+                  (click)="removeImage(imagePath)"
+                  [disabled]="isRemovingImage"
+                  class="remove-btn">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dodavanje novih slika -->
+    <div class="add-images">
+      <h4>Add New Images:</h4>
+      <mat-form-field>
+        <mat-label>Select images from computer</mat-label>
+        <input type="file" 
+               #fileInput
+               multiple 
+               accept="image/*"
+               (change)="onFileSelect($event)"
+               style="display: none;">
+        <input matInput 
+               readonly
+               [value]="getSelectedFilesText()"
+               (click)="fileInput.click()"
+               placeholder="Click to select images from your computer">
+      </mat-form-field>
+
+      <!-- Preview novih slika -->
+      <div *ngIf="selectedFiles.length > 0" class="selected-images">
+        <p>Selected images to add:</p>
+        <div class="images-preview">
+          <div *ngFor="let file of selectedFiles; let i = index" class="image-preview-item">
+            <img [src]="getFilePreview(file)" alt="Preview" class="preview-image">
+            <div class="image-actions">
+              <button mat-icon-button 
+                      color="primary" 
+                      (click)="addSingleImage(file, i)"
+                      [disabled]="isAddingImage">
+                <mat-icon>add</mat-icon>
+              </button>
+              <button mat-icon-button 
+                      color="warn" 
+                      (click)="removeSelectedFile(i)">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="loading" class="loading">
+  Loading blog...
+</div>
