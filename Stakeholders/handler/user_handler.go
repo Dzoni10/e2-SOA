@@ -166,3 +166,59 @@ func (handler *UserHandler) ExtractUserIDFromToken(req *http.Request) int {
 
 	return 0
 }
+
+func (handler *UserHandler) BlockUser(writer http.ResponseWriter, req *http.Request) {
+	userID_str := mux.Vars(req)["id"]
+	userID, err := strconv.Atoi(userID_str)
+	if err != nil {
+		writer.WriteHeader(http.StatusBadRequest)
+		writer.Write([]byte(`{"error": "Invalid ID format"}`))
+		return
+	}
+
+	blockedUser, err := handler.UserService.BlockUser(userID)
+	writer.Header().Set("Content-Type", "application/json")
+
+	if err != nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(writer).Encode(map[string]string{"error": "Failed to block user"})
+		return
+	}
+
+	writer.WriteHeader(http.StatusOK)
+	json.NewEncoder(writer).Encode(blockedUser)
+}
+
+func (handler *UserHandler) UpdateUserProfile(writer http.ResponseWriter, req *http.Request) {
+	tokenUserID := handler.ExtractUserIDFromToken(req)
+	if tokenUserID == 0 {
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(writer).Encode(map[string]string{"error": "Invalid or missing token"})
+		return
+	}
+
+	user, err := handler.UserService.FindUser(tokenUserID)
+
+	if err != nil {
+		writer.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(writer).Encode(map[string]string{"error": "bad user id"})
+	}
+
+	// Parse request body
+	var profileDTO dto.UserProfile
+	if err := json.NewDecoder(req.Body).Decode(&profileDTO); err != nil {
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(writer).Encode(map[string]string{"error": "Invalid JSON format"})
+		return
+	}
+
+	// Update user profile using service
+	handler.UserService.UpdateUserProfile(&user, &profileDTO)
+
+	// Return success response
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusOK)
+	json.NewEncoder(writer).Encode(map[string]string{"message": "Profile updated successfully"})
+}

@@ -45,3 +45,17 @@ func (repo *UserRepository) FindAllExcept(userID int) ([]model.User, error) {
 	result := repo.DatabaseConnection.Where("role != ? AND id != ?", 0, userID).Find(&users)
 	return users, result.Error
 }
+
+func (repo *UserRepository) BlockUser(userID int) (*model.User, error) {
+	var foundUser model.User
+	foundUser, err := repo.FindById(userID)
+	if err != nil {
+		return nil, err
+	}
+	foundUser.Blocked = true
+	dbResult := repo.DatabaseConnection.Save(&foundUser)
+	if dbResult.Error != nil {
+		return nil, dbResult.Error
+	}
+	return &foundUser, nil
+}

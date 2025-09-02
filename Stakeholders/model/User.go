@@ -1,6 +1,8 @@
 package model
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 type Role int //Role type for enum
 
@@ -17,6 +19,10 @@ type User struct {
 	Username string `json:"username" gorm:"not null; type: varchar(10)"`
 	Password string `json:"-" gorm:"not null; type: varchar(100)"` // OVDE MINUS ZNACI DA SE NE SALJE KA FRONTU UD ODGOVORUI
 	Role     Role   `json:"role" gorm:"not null"`
+	Blocked  bool   `json:"-" gorm:"not null"`
+	Image    string `json:"image" gorm:"not null"`
+	Bio      string `json:"bio" gorm:"not null"`
+	Moto     string `json:"moto" gorm:"not null"`
 }
 
 // Konverzija enuma u string

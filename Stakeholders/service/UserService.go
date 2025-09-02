@@ -1,6 +1,7 @@
 package service
 
 import (
+	"database-example/dto"
 	"database-example/model"
 	"database-example/repo"
 	"errors"
@@ -33,4 +34,27 @@ func (s *UserService) Authenticate(username, password string) (*model.User, erro
 
 func (service *UserService) GetAllUsersExcept(userID int) ([]model.User, error) {
 	return service.Repo.FindAllExcept(userID)
+}
+
+func (service *UserService) BlockUser(userID int) (*model.User, error) {
+	return service.Repo.BlockUser(userID)
+}
+
+func (service *UserService) UpdateUserProfile(u *model.User, dto *dto.UserProfile) {
+	if dto.Name != "" {
+		u.Name = dto.Name
+	}
+	if dto.Surname != "" {
+		u.Surname = dto.Surname
+	}
+	if dto.Bio != "" {
+		u.Bio = dto.Bio
+	}
+	if dto.Moto != "" {
+		u.Moto = dto.Moto
+	}
+	if dto.Image != "" {
+		u.Image = dto.Image
+	}
+	service.Repo.DatabaseConnection.Save(&u)
 }

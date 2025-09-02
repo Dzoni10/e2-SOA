@@ -24,6 +24,8 @@ func main() {
 	router.HandleFunc("/users/{id}", userHandler.Get).Methods("GET")
 	router.HandleFunc("/users", userHandler.Create).Methods("POST")
 	router.HandleFunc("/users/login", userHandler.Login).Methods("POST")
+	router.HandleFunc("/users/{id}/block", userHandler.BlockUser).Methods("GET")
+	router.HandleFunc("/users/editProfile", userHandler.UpdateUserProfile).Methods("PUT")
 
 	corsHandler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:4200"},
