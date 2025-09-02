@@ -1,0 +1,21 @@
+.comments {
+  margin-top: 20px;
+}
+
+.comment-card {
+  background: #f9f9f9;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+}
+
+.add-comment textarea {
+  width: 100%;
+  min-height: 60px;
+  margin-bottom: 10px;
+}
+
+.add-comment button {
+  padding: 6px 12px;
+  cursor: pointer;
+}
