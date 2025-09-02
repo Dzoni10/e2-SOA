@@ -20,6 +20,9 @@ func main() {
 	blogRepo := &repo.BlogRepository{}
 	blogSrv := &service.BlogService{Repo: blogRepo}
 	blogHandler := &handler.BlogHandler{Service: blogSrv}
+	commentRepo := &repo.CommentRepository{}
+	commentSrv := &service.CommentService{Repo: commentRepo}
+	commentHandler := &handler.CommentHandler{Service: commentSrv}
 
 	r := mux.NewRouter()
 
@@ -29,6 +32,9 @@ func main() {
 	r.HandleFunc("/blogs", blogHandler.CreateBlog).Methods("POST")
 	r.HandleFunc("/blogs/creator/{creatorId}", blogHandler.GetBlogsByCreator).Methods("GET")
 	r.HandleFunc("/uploads/images/{filename}", blogHandler.ServeImage).Methods("GET")
+
+	r.HandleFunc("/blogs/{id}/comments", commentHandler.GetComments).Methods("GET")
+	r.HandleFunc("/blogs/{id}/comments", commentHandler.AddComment).Methods("POST")
 
 	corsHandler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:4200"},

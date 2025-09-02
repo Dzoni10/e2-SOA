@@ -13,5 +13,8 @@ export class StakeholdersService {
   getAllUsers() {
   return this.http.get<User[]>('http://localhost:8080/users/all');
 }
+getUserById(id: number) {
+    return this.http.get<User>(`http://localhost:8080/users/${id}`);
+  }
 
 }

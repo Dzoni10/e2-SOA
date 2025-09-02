@@ -13,6 +13,7 @@ import (
 
 var Client *mongo.Client
 var BlogCollection *mongo.Collection
+var CommentCollection *mongo.Collection
 
 func Init() {
 	uri := os.Getenv("MONGO_URI")
@@ -49,4 +50,5 @@ func Init() {
 
 	Client = client
 	BlogCollection = client.Database(dbName).Collection(collName)
+	CommentCollection = client.Database(dbName).Collection("Comments")
 }

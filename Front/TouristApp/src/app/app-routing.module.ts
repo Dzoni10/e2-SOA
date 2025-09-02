@@ -8,7 +8,7 @@ import { AccountsComponent } from './auth/accounts/accounts.component';
 import { ToursListComponent } from './tours/tours-list/tours-list.component';
 import { BlogCreationComponent } from './blogs/blog-creation/blog-creation.component';
 import { BlogsListComponent } from './blogs/blogs-list/blogs-list.component';
-
+import { BlogCommentsComponent } from './blogs/blog-comments/blog-comments.component';
 const routes: Routes = [
   {path: 'login', component:LoginComponent},
   {path: 'register', component:SignupComponent},
@@ -17,7 +17,9 @@ const routes: Routes = [
   {path: 'accounts', component:AccountsComponent},
   {path: 'toursList', component: ToursListComponent},
   {path: 'blogCreation', component: BlogCreationComponent},
-  {path: 'blogsList', component: BlogsListComponent}
+  {path: 'blogsList', component: BlogsListComponent},
+  {path: 'blogs/:id/comments', component: BlogCommentsComponent }
+
 ];
 
 @NgModule({
