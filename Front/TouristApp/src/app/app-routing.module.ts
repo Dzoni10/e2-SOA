@@ -10,6 +10,8 @@ import { BlogCreationComponent } from './blogs/blog-creation/blog-creation.compo
 import { BlogsListComponent } from './blogs/blogs-list/blogs-list.component';
 import { BlogCommentsComponent } from './blogs/blog-comments/blog-comments.component';
 import { BlogEditComponent } from './blogs/blog-edit/blog-edit.component';
+import { AddReviewComponent } from './tours/add-review/add-review.component';
+import { TourReviewComponent } from './tours/tour-review/tour-review.component';
 const routes: Routes = [
   {path: 'login', component:LoginComponent},
   {path: 'register', component:SignupComponent},
@@ -17,10 +19,14 @@ const routes: Routes = [
   {path: 'tourCreation', component: TourCreationComponent},
   {path: 'accounts', component:AccountsComponent},
   {path: 'toursList', component: ToursListComponent},
+  {path: 'allTours', component: ToursListComponent },
   {path: 'blogCreation', component: BlogCreationComponent},
   {path: 'blogsList', component: BlogsListComponent}, 
-    { path: 'blogs/edit/:id', component: BlogEditComponent }, 
-  {path: 'blogs/:id/comments', component: BlogCommentsComponent }
+  {path: 'blogs/edit/:id', component: BlogEditComponent }, 
+  {path: 'blogs/:id/comments', component: BlogCommentsComponent },
+  {path: 'addReview/:id', component: AddReviewComponent },
+  {path: 'tours/:id/reviews', component: TourReviewComponent }
+
 
 ];
 

@@ -12,12 +12,18 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { ToursListComponent } from './tours-list/tours-list.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
+import { FormsModule } from '@angular/forms';
+import { AddReviewComponent } from './add-review/add-review.component';
+import { TourReviewComponent } from './tour-review/tour-review.component';
+
 
 
 @NgModule({
   declarations: [
     TourCreationComponent,
-    ToursListComponent
+    ToursListComponent,
+    AddReviewComponent,
+    TourReviewComponent
   ],
   imports: [
     CommonModule,
@@ -30,7 +36,8 @@ import { MatGridListModule } from '@angular/material/grid-list';
     MatIconModule,
     ReactiveFormsModule,
     MatCardModule,
-    MatGridListModule
+    MatGridListModule,
+    FormsModule
   ]
 })
 export class ToursModule { }

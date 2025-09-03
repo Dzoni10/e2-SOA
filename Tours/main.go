@@ -16,15 +16,25 @@ func main() {
 
 	database.Init()
 
-	repo := &repo.TourRepository{}
-	srv := &service.TourService{Repo: repo}
+	tourRepo := &repo.TourRepository{}
+	srv := &service.TourService{Repo: tourRepo}
 	h := &handler.TourHandler{Service: srv}
+
+	reviewRepo := &repo.ReviewRepository{}
+	reviewSrv := &service.ReviewService{Repo: reviewRepo}
+	reviewHandler := &handler.ReviewHandler{Service: reviewSrv}
 
 	r := mux.NewRouter()
 
 	r.HandleFunc("/tours/all", h.GetAllTours).Methods("GET")
 	r.HandleFunc("/tours/{id}", h.GetTour).Methods("GET")
 	r.HandleFunc("/tours", h.CreateTour).Methods("POST")
+
+	r.HandleFunc("/tours/{id}/reviews", reviewHandler.GetReviewsForTour).Methods("GET")
+	r.HandleFunc("/reviews", reviewHandler.CreateReview).Methods("POST")
+	r.HandleFunc("/reviews/{id}/add-image", reviewHandler.AddImageToReview).Methods("POST")
+	r.HandleFunc("/reviews/{id}/remove-image", reviewHandler.RemoveImageFromReview).Methods("DELETE")
+	r.HandleFunc("/uploads/reviews/{filename}", reviewHandler.ServeImage).Methods("GET")
 
 	corsHandler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:4200"},

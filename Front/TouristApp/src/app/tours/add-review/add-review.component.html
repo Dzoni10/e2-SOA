@@ -1,0 +1,61 @@
+<div class="review-form">
+  <h2>Add Review</h2>
+
+  <!-- Rating sa zvezdicama -->
+  <div class="rating-stars">
+    <mat-icon *ngFor="let star of stars; let i = index"
+              (click)="setRating(i + 1)"
+              [class.filled]="i < review.rating">
+      star
+    </mat-icon>
+  </div>
+
+  <!-- Comment -->
+  <mat-form-field appearance="fill" class="form-field">
+    <mat-label>Comment</mat-label>
+    <textarea matInput [(ngModel)]="review.comment" name="comment" rows="5"></textarea>
+  </mat-form-field>
+
+  <!-- Upload slika -->
+  <mat-form-field>
+    <mat-label>Images</mat-label>
+    <input type="file"
+           #fileInput
+           multiple
+           accept="image/*"
+           (change)="onFileSelect($event)"
+           style="display:none">
+    <input matInput
+           readonly
+           [value]="getSelectedFilesText()"
+           (click)="fileInput.click()"
+           placeholder="Click to select images">
+  </mat-form-field>
+
+  <!-- Preview -->
+  <div *ngIf="selectedFiles.length > 0" class="selected-images">
+    <h4>Selected images:</h4>
+    <div class="images-preview">
+      <div *ngFor="let file of selectedFiles; let i = index" class="image-preview-item">
+        <img [src]="getFilePreview(file)" alt="Preview" class="preview-image">
+        <div class="image-info">
+          <span>{{file.name}}</span>
+          <button type="button"
+                  mat-icon-button
+                  color="warn"
+                  (click)="removeFile(i)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dugmad -->
+  <div class="buttons">
+    <button mat-raised-button color="primary" (click)="submitReview()" [disabled]="isSubmitting">
+      {{ isSubmitting ? 'Submitting...' : 'Submit' }}
+    </button>
+    <button mat-raised-button color="warn" routerLink="/allTours">Cancel</button>
+  </div>
+</div>
