@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Tour } from './model/tour.model';
+import { Review } from './model/review.model'
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -17,5 +18,12 @@ export class ToursService {
 
   getAllTours(): Observable<Tour[]>{
     return this.http.get<Tour[]>(`${this.apiUrl}/all`);
+  }
+  
+  addReview(review: Review): Observable<Review> {
+    return this.http.post<Review>(`http://localhost:8081/reviews`, review);
+  }
+  getReviewsForTour(tourId: string): Observable<Review[]> {
+    return this.http.get<Review[]>(`http://localhost:8081/tours/${tourId}/reviews`);
   }
 }

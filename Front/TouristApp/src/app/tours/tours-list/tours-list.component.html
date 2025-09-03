@@ -15,6 +15,16 @@
           <p><strong>Cost:</strong> {{tour.cost}}</p>
           <p><strong>Length(in km):</strong> {{tour.tourLength}}</p>
         </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button color="primary" (click)="seeReview(tour.id)">
+            See Reviews
+          </button>
+        </mat-card-actions>
+        <mat-card-actions *ngIf="isAllTours">
+          <button mat-raised-button color="primary" (click)="addReview(tour.id)">
+            Add Review
+          </button>
+        </mat-card-actions>
       </mat-card>
     </mat-grid-tile>
   </mat-grid-list>

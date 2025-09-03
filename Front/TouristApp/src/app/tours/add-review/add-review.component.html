@@ -1,0 +1,24 @@
+<div class="review-form">
+  <h2>Add Review</h2>
+
+  <!-- Rating sa zvezdicama -->
+  <div class="rating-stars">
+    <mat-icon *ngFor="let star of stars; let i = index"
+              (click)="setRating(i + 1)"
+              [class.filled]="i < review.rating">
+      star
+    </mat-icon>
+  </div>
+
+  <!-- Comment -->
+  <mat-form-field appearance="fill" class="form-field">
+    <mat-label>Comment</mat-label>
+    <textarea matInput [(ngModel)]="review.comment" name="comment" rows="5"></textarea>
+  </mat-form-field>
+
+  <!-- Dugmad -->
+  <div class="buttons">
+    <button mat-raised-button color="primary" (click)="submitReview()">Submit</button>
+    <button mat-raised-button color="warn" routerLink="/allTours">Cancel</button>
+  </div>
+</div>
