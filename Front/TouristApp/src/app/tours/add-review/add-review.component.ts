@@ -19,9 +19,11 @@ export class AddReviewComponent implements OnInit {
     username: '',
     rating: 1,
     comment: '',
-    image: ''
+    images: []
   };
   stars = [1, 2, 3, 4, 5];
+  selectedFiles: File[] = [];
+  isSubmitting = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -53,18 +55,52 @@ export class AddReviewComponent implements OnInit {
     }
   }
 
+  onFileSelect(event: any): void {
+    const files = event.target.files;
+    if (files) {
+      for (let i = 0; i < files.length; i++) {
+        this.selectedFiles.push(files[i]);
+      }
+    }
+  }
+
+  removeFile(index: number): void {
+    this.selectedFiles.splice(index, 1);
+  }
+
+  getSelectedFilesText(): string {
+    return this.selectedFiles.length > 0
+      ? this.selectedFiles.map(f => f.name).join(', ')
+      : '';
+  }
+
+  getFilePreview(file: File): string {
+    return URL.createObjectURL(file);
+  }
+
   submitReview(): void {
-    this.tourService.addReview(this.review).subscribe({
+    if (!this.review.comment || !this.review.rating) {
+      this.snackBar.open("Rating and comment are required!", "Close", { duration: 3000 });
+      return;
+    }
+
+    this.isSubmitting = true;
+
+    this.tourService.addReviewWithImages(this.review, this.selectedFiles).subscribe({
       next: () => {
-        this.snackBar.open('Review added successfully!', 'Close', { duration: 3000 });
-        this.router.navigate(['/allTours']);
+        this.snackBar.open("Review added successfully", "Close", { duration: 3000 });
+        this.router.navigate(['/tours', this.review.tourId, 'reviews']);
+        this.isSubmitting = false;
+        this.selectedFiles = [];
       },
       error: (err) => {
-        console.error('Error adding review', err);
-        this.snackBar.open('Failed to add review', 'Close', { duration: 3000 });
+        console.error("Error adding review", err);
+        this.snackBar.open("Failed to add review", "Close", { duration: 3000 });
+        this.isSubmitting = false;
       }
     });
   }
+
 
    setRating(value: number): void {
         this.review.rating = value;

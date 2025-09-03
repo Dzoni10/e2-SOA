@@ -5,7 +5,7 @@ export interface Review {
   username: string;
   rating: number;
   comment: string;
-  visitedAt?: Date;
+  images?: string[];   
   createdAt?: Date;
-  image?: string;
+  visitedAt?: Date;
 }

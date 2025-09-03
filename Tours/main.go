@@ -31,7 +31,10 @@ func main() {
 	r.HandleFunc("/tours", h.CreateTour).Methods("POST")
 
 	r.HandleFunc("/tours/{id}/reviews", reviewHandler.GetReviewsForTour).Methods("GET")
-	r.HandleFunc("/reviews", reviewHandler.AddReview).Methods("POST")
+	r.HandleFunc("/reviews", reviewHandler.CreateReview).Methods("POST")
+	r.HandleFunc("/reviews/{id}/add-image", reviewHandler.AddImageToReview).Methods("POST")
+	r.HandleFunc("/reviews/{id}/remove-image", reviewHandler.RemoveImageFromReview).Methods("DELETE")
+	r.HandleFunc("/uploads/reviews/{filename}", reviewHandler.ServeImage).Methods("GET")
 
 	corsHandler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:4200"},

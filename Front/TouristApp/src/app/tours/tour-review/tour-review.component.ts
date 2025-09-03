@@ -13,6 +13,7 @@ export class TourReviewComponent implements OnInit {
   reviews: Review[] = [];
   tourId: string = '';
   loading = true;
+  currentIndexes: { [key: string]: number } = {};
 
   constructor(
     private route: ActivatedRoute,
@@ -34,4 +35,29 @@ export class TourReviewComponent implements OnInit {
       });
     }
   }
+  prevImage(review: Review) {
+    const id = review.id!;
+    const length = review.images?.length ?? 0;
+    if (length === 0) return;
+
+    if (this.currentIndexes[id] === undefined) {
+      this.currentIndexes[id] = 0;
+    }
+    this.currentIndexes[id] =
+      (this.currentIndexes[id] - 1 + length) % length;
+  }
+
+  nextImage(review: Review) {
+    const id = review.id!;
+    const length = review.images?.length ?? 0;
+    if (length === 0) return;
+
+    if (this.currentIndexes[id] === undefined) {
+      this.currentIndexes[id] = 0;
+    }
+    this.currentIndexes[id] =
+      (this.currentIndexes[id] + 1) % length;
+  }
+
+
 }

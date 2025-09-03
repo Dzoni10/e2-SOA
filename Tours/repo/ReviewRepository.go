@@ -36,3 +36,20 @@ func (r *ReviewRepository) FindByTourID(tourID primitive.ObjectID) ([]model.Revi
 	}
 	return reviews, nil
 }
+func (r *ReviewRepository) AddImages(reviewID primitive.ObjectID, images []string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	update := bson.M{"$push": bson.M{"images": bson.M{"$each": images}}}
+	_, err := database.ReviewCollection.UpdateOne(ctx, bson.M{"_id": reviewID}, update)
+	return err
+}
+
+func (r *ReviewRepository) RemoveImage(reviewID primitive.ObjectID, imagePath string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	update := bson.M{"$pull": bson.M{"images": imagePath}}
+	_, err := database.ReviewCollection.UpdateOne(ctx, bson.M{"_id": reviewID}, update)
+	return err
+}

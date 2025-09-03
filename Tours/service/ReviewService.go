@@ -12,7 +12,7 @@ type ReviewService struct {
 	Repo *repo.ReviewRepository
 }
 
-func (s *ReviewService) AddReview(review *model.Review) error {
+func (s *ReviewService) Create(review *model.Review) error {
 	review.ID = primitive.NewObjectID()
 	review.CreatedAt = time.Now()
 	if review.VisitedAt.IsZero() {
@@ -23,4 +23,12 @@ func (s *ReviewService) AddReview(review *model.Review) error {
 
 func (s *ReviewService) GetReviewsForTour(tourID primitive.ObjectID) ([]model.Review, error) {
 	return s.Repo.FindByTourID(tourID)
+}
+
+func (s *ReviewService) AddImages(reviewID primitive.ObjectID, images []string) error {
+	return s.Repo.AddImages(reviewID, images)
+}
+
+func (s *ReviewService) RemoveImage(reviewID primitive.ObjectID, imagePath string) error {
+	return s.Repo.RemoveImage(reviewID, imagePath)
 }

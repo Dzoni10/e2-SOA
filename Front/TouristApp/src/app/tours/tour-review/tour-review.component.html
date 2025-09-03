@@ -1,9 +1,7 @@
-<div class="reviews-container" *ngIf="!loading; else loader">
-  <h2>Reviews for Tour</h2>
-
-  <div *ngIf="reviews.length > 0; else noReviews">
-    <div *ngFor="let review of reviews" class="review-card">
-      <!-- rating -->
+<div *ngFor="let review of reviews" class="review-card">
+  <div class="review-content">
+    <!-- leva strana -->
+    <div class="review-text">
       <div class="rating-stars">
         <mat-icon *ngFor="let star of [1,2,3,4,5]"
                   [class.filled]="star <= review.rating">
@@ -14,6 +12,19 @@
       <p><strong>{{ review.username }}</strong>:</p>
       <p>{{ review.comment }}</p>
       <small>{{ review.createdAt | date:'short' }}</small>
+    </div>
+
+    <!-- desna strana: slike slider -->
+    <div class="review-images" *ngIf="review.images && review.images.length > 0">
+      <div class="image-slider">
+        <div class="slider">
+          <img [src]="'http://localhost:8081' + img"
+               *ngFor="let img of review.images; let i = index"
+               [class.active]="i === (currentIndexes[review.id!] ?? 0)">
+        </div>
+        <button (click)="prevImage(review)">‹</button>
+        <button (click)="nextImage(review)">›</button>
+      </div>
     </div>
   </div>
 

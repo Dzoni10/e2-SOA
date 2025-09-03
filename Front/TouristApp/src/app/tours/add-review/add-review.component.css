@@ -53,3 +53,33 @@ mat-icon.filled {
   gap: 10px;
   margin-top: 20px;
 }
+
+.images-preview {
+  display: flex;
+  flex-wrap: wrap;       /* ako ima puno slika, prelomi u novi red */
+  gap: 10px;             /* razmak između thumbnailova */
+  margin-top: 10px;
+}
+
+.image-preview-item {
+  display: flex;
+  flex-direction: column;  /* slika gore, ime + dugme ispod */
+  align-items: center;
+  width: 150px;            /* širina thumb-a */
+}
+
+.preview-image {
+  max-width: 150px;
+  max-height: 150px;
+  object-fit: cover;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.image-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 5px;
+}
