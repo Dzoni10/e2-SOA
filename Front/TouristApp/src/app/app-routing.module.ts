@@ -10,6 +10,8 @@ import { BlogCreationComponent } from './blogs/blog-creation/blog-creation.compo
 import { BlogsListComponent } from './blogs/blogs-list/blogs-list.component';
 import { BlogCommentsComponent } from './blogs/blog-comments/blog-comments.component';
 import { BlogEditComponent } from './blogs/blog-edit/blog-edit.component';
+import { FollowRecommendationsComponent } from './followers/follow-recommendations/follow-recommendations.component';
+
 const routes: Routes = [
   {path: 'login', component:LoginComponent},
   {path: 'register', component:SignupComponent},
@@ -20,6 +22,7 @@ const routes: Routes = [
   {path: 'blogCreation', component: BlogCreationComponent},
   {path: 'blogsList', component: BlogsListComponent}, 
     { path: 'blogs/edit/:id', component: BlogEditComponent }, 
+    {path: 'recommendations', component: FollowRecommendationsComponent},
   {path: 'blogs/:id/comments', component: BlogCommentsComponent }
 
 ];

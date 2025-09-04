@@ -6,6 +6,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Blog } from '../model/blog.model';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { AuthService } from 'src/app/auth/auth.service';
+import { StakeholdersService } from 'src/app/stakeholders/stakeholders.service'; // Prilagodite putanju
 
 @Component({
   selector: 'app-blog-creation',
@@ -24,7 +25,8 @@ export class BlogCreationComponent implements OnInit {
     private blogService: BlogsService, 
     private router: Router, 
     private snackBar: MatSnackBar, 
-    private authService: AuthService
+    private authService: AuthService,
+    private stakeholdersService: StakeholdersService
   ) {}
 
   ngOnInit(): void {
@@ -34,13 +36,30 @@ export class BlogCreationComponent implements OnInit {
         this.snackBar.open("You must be logged in to create a blog", "Close", {duration: 3000, horizontalPosition: "center"});
         return;
     }
-    
-    this.blogCreationForm = this.fb.group({
-      title: ['', Validators.required],
-      description: ['', Validators.required],
-      creatorID: [Number(user.userId)]
-    });
+this.blogCreationForm = this.fb.group({
+    title: ['', Validators.required],
+    description: ['', Validators.required],
+    creatorID: [Number(user.userId)],
+    username: ['']   // placeholder
+  });
+
+  // asinhrono postavi username kad ga dobaviš
+  this.stakeholdersService.getUserById(user.userId).subscribe({
+    next: (fetchedUser) => {
+      this.blogCreationForm.patchValue({
+        username: fetchedUser.username || 'Anonymous'
+      });
+    },
+    error: () => {
+      this.blogCreationForm.patchValue({
+        username: 'Anonymous'
+      });
+    }
+  });
   }
+
+
+ 
 
   onFileSelect(event: any): void {
     const files = event.target.files;
@@ -79,7 +98,8 @@ export class BlogCreationComponent implements OnInit {
     const blogData: Omit<Blog, 'id' | 'createdAt' | 'images'> = {
       title: this.blogCreationForm.value.title,
       description: this.blogCreationForm.value.description,
-      creatorID: this.blogCreationForm.value.creatorID
+      creatorID: this.blogCreationForm.value.creatorID,
+      username: this.blogCreationForm.value.username
     };
 
     this.blogService.createBlogWithImages(blogData, this.selectedFiles).subscribe({

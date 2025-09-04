@@ -7,10 +7,22 @@
         <mat-card-header>
           <mat-card-title>{{ blog.title }}</mat-card-title>
           <mat-card-subtitle>{{ blog.createdAt | date:'short' }}</mat-card-subtitle>
-          <button [routerLink]="['/blogs', blog.id, 'comments']" mat-button class="comments-btn">
-            <mat-icon>comment</mat-icon>
-            View Comments
-          </button>
+         <div class="header-actions">
+              <button *ngIf="canViewComments(blog)"
+                    [routerLink]="['/blogs', blog.id, 'comments']" 
+                    mat-button 
+                    class="comments-btn">
+              <mat-icon>comment</mat-icon>
+              View Comments
+            </button>
+           <button *ngIf="!isOwnBlog(blog)" 
+                    mat-button 
+                    [ngClass]="getFollowButtonClass(blog)"
+                    (click)="toggleFollow(blog)">
+              <mat-icon>{{ getFollowIcon(blog) }}</mat-icon>
+              {{ getFollowText(blog) }}
+            </button>
+          </div>
         </mat-card-header>
         
         <mat-card-content>
@@ -28,7 +40,7 @@
           </div>
 
           <div class="blog-meta">
-            <p>Creator id: {{blog.creatorID}}</p>
+            <p>Created by: <strong>{{ blog.username || 'Anonymous' }}</strong></p>
 
             <!-- Dugme za lajk -->
             <button mat-button color="warn" (click)="toggleLike(blog)" class="like-btn">
@@ -38,7 +50,6 @@
           </div>
         </mat-card-content>
 
-        <!-- NOVO: Edit dugme samo za vlasnika bloga -->
         <mat-card-actions *ngIf="canEditBlog(blog)" class="edit-actions">
           <button mat-raised-button 
                   color="primary" 

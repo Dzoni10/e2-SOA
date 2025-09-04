@@ -22,7 +22,10 @@ func main() {
 	blogHandler := &handler.BlogHandler{Service: blogSrv}
 	commentRepo := &repo.CommentRepository{}
 	commentSrv := &service.CommentService{Repo: commentRepo}
-	commentHandler := &handler.CommentHandler{Service: commentSrv}
+	commentHandler := &handler.CommentHandler{
+		Service:     commentSrv,
+		BlogService: blogSrv,
+	}
 
 	likeSrv := &service.LikeService{}
 	likeHandler := &handler.LikeHandler{Service: likeSrv}

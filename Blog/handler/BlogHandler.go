@@ -84,7 +84,7 @@ func (h *BlogHandler) CreateBlog(w http.ResponseWriter, r *http.Request) {
 
 	blog.Title = r.FormValue("title")
 	blog.Description = r.FormValue("description")
-
+	blog.Username = r.FormValue("username")
 	creatorIDStr := r.FormValue("creatorID")
 	if creatorIDStr == "" {
 		http.Error(w, "Creator ID is required", http.StatusBadRequest)
@@ -99,8 +99,8 @@ func (h *BlogHandler) CreateBlog(w http.ResponseWriter, r *http.Request) {
 	blog.CreatorID = creatorID
 
 	// Validacija osnovnih podataka
-	if blog.Title == "" || blog.Description == "" {
-		http.Error(w, "Title and description are required", http.StatusBadRequest)
+	if blog.Title == "" || blog.Description == "" || blog.Username == "" {
+		http.Error(w, "Title, description, and username are required", http.StatusBadRequest)
 		return
 	}
 

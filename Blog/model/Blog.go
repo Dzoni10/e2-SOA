@@ -18,5 +18,6 @@ type Blog struct {
 	CreatedAt   time.Time          `bson:"createdAt" json:"createdAt"`
 	Images      []string           `bson:"images,omitempty" json:"images"` // Array of image URLs
 	CreatorID   int                `bson:"creatorID" json:"creatorID"`
+	Username    string             `bson:"username" json:"username"`
 	Likes       []Like             `bson:"likes,omitempty" json:"likes,omitempty"`
 }

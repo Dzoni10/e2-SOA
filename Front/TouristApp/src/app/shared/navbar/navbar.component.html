@@ -7,6 +7,7 @@
         <button mat-raised-button *ngIf="isLoggedIn()&&isLoggedAuthor()" class="tour-creation-button" [routerLink]="['tourCreation']">Create tour</button>
         <button mat-raised-button *ngIf="isLoggedIn()" class="blogs-button" [routerLink]="['blogsList']">All Blogs</button>
         <button mat-raised-button *ngIf="isLoggedIn()" class="blog-creation-button" [routerLink]="['blogCreation']">Create Blog</button>
+        <button mat-raised-button *ngIf="isLoggedIn()" class="blog-creation-button" [routerLink]="['recommendations']">Recommendations</button>
         <button mat-raised-button *ngIf="!isLoggedIn()" class="login-button" [routerLink]="['login']">Log in</button>
         <button mat-raised-button *ngIf="isLoggedIn()" class="logout-button" (click)="logout()">Log out</button>
     </div>

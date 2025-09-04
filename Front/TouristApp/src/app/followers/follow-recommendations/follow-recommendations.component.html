@@ -1,0 +1,73 @@
+<div class="recommendations-container">
+  <div class="header">
+    <h2>Recommendations users</h2>
+    <button mat-icon-button (click)="refreshRecommendations()" [disabled]="loading" class="refresh-btn">
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <p>Loading...</p>
+  </div>
+
+  <div *ngIf="!loading && recommendations.length === 0" class="no-recommendations">
+    <mat-icon class="large-icon">people_outline</mat-icon>
+    <h3>no Recommendations</h3>
+  </div>
+
+  <div *ngIf="!loading && recommendations.length > 0" class="recommendations-list">
+    <mat-card *ngFor="let recommendation of recommendations" class="recommendation-card">
+      <mat-card-header>
+        <div mat-card-avatar class="avatar">
+          <mat-icon>person</mat-icon>
+        </div>
+        <mat-card-title>{{ recommendation.recommendedUser.username }}</mat-card-title>
+        <mat-card-subtitle>
+          {{ recommendation.recommendedUser.name || 'Nema ime' }}
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="recommendation-reason">
+          <mat-icon class="reason-icon">info_outline</mat-icon>
+          <span>{{ recommendation.recommendationReason }}</span>
+        </div>
+        
+        <div *ngIf="recommendation.mutualFollowers.length > 0" class="mutual-followers">
+          <mat-icon class="mutual-icon">people</mat-icon>
+          <span class="mutual-text">{{ getMutualFollowersText(recommendation.mutualFollowers) }}</span>
+        </div>
+
+        <div *ngIf="recommendation.mutualFollowers.length > 2" class="mutual-followers-chips">
+          <mat-chip-listbox>
+            <mat-chip *ngFor="let mutual of recommendation.mutualFollowers.slice(0, 3)">
+              {{ mutual }}
+            </mat-chip>
+            <mat-chip *ngIf="recommendation.mutualFollowers.length > 3" class="more-chip">
+              +{{ recommendation.mutualFollowers.length - 3 }} još
+            </mat-chip>
+          </mat-chip-listbox>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions class="card-actions">
+        <button mat-button 
+                color="primary" 
+                (click)="goToUserProfile(recommendation.recommendedUser)"
+                class="profile-btn">
+          <mat-icon>person</mat-icon>
+          Profile
+        </button>
+        
+      <button mat-raised-button 
+        color="accent" 
+        (click)="followUser(recommendation)"
+        [disabled]="isFollowingInProgress(recommendation.recommendedUser.userId)"
+        class="follow-btn">
+  <mat-icon *ngIf="!isFollowingInProgress(recommendation.recommendedUser.userId)">person_add</mat-icon>
+  {{ isFollowingInProgress(recommendation.recommendedUser.userId) ? 'Following...' : 'Follow' }}
+</button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

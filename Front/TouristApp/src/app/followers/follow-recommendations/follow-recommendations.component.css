@@ -1,0 +1,208 @@
+.recommendations-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.header h2 {
+  color: #333;
+  margin: 0;
+  font-weight: 500;
+}
+
+.refresh-btn {
+  color: #666;
+}
+
+.refresh-btn:hover {
+  color: #1976d2;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.loading p {
+  margin-top: 15px;
+  font-size: 1.1rem;
+}
+
+.no-recommendations {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.no-recommendations .large-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  color: #ccc;
+  margin-bottom: 20px;
+}
+
+.no-recommendations h3 {
+  color: #999;
+  margin: 20px 0 10px;
+}
+
+.recommendations-list {
+  display: grid;
+  gap: 20px;
+}
+
+.recommendation-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+}
+
+.recommendation-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.avatar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.recommendation-reason {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.reason-icon {
+  margin-right: 8px;
+  color: #1976d2;
+  font-size: 18px;
+}
+
+.mutual-followers {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  color: #777;
+  font-size: 0.9rem;
+}
+
+.mutual-icon {
+  margin-right: 8px;
+  color: #4caf50;
+  font-size: 18px;
+}
+
+.mutual-text {
+  font-style: italic;
+}
+
+.mutual-followers-chips {
+  margin: 10px 0;
+}
+
+.mutual-followers-chips mat-chip {
+  font-size: 0.8rem;
+  margin: 2px;
+}
+
+.more-chip {
+  background-color: #f5f5f5 !important;
+  color: #666 !important;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.profile-btn {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.profile-btn:hover {
+  background-color: rgba(0,0,0,0.04);
+}
+
+.follow-btn {
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  color: white;
+  font-weight: 500;
+  min-width: 120px;
+}
+
+.follow-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+  transform: translateY(-1px);
+}
+
+.follow-btn:disabled {
+  background-color: #cccccc !important;
+  color: #999999 !important;
+}
+
+.follow-btn mat-icon {
+  margin-right: 5px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .recommendations-container {
+    margin: 10px;
+    padding: 15px;
+  }
+  
+  .header h2 {
+    font-size: 1.3rem;
+  }
+  
+  .recommendation-card {
+    margin: 10px 0;
+  }
+  
+  .card-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .profile-btn,
+  .follow-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .recommendations-container {
+    margin: 5px;
+    padding: 10px;
+  }
+  
+  .mutual-followers-chips {
+    text-align: center;
+  }
+}
