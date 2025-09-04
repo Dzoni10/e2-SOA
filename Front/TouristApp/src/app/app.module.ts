@@ -13,6 +13,7 @@ import { StakeholdersModule } from './stakeholders/stakeholders.module';
 import { UserAccountsComponent } from './stakeholders/user-accounts/user-accounts.component';
 import { ToursModule } from './tours/tours.module';
 import { BlogsModule } from './blogs/blogs.module';
+import { FollowersModule } from './followers/followers.module';
 
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './auth/interceptor-jwt/auth.interceptor';
@@ -34,7 +35,8 @@ import { AuthInterceptor } from './auth/interceptor-jwt/auth.interceptor';
     AuthModule,
     MatCardModule,
     ToursModule,
-    BlogsModule
+    BlogsModule,
+    FollowersModule
 
   ],
   providers: [

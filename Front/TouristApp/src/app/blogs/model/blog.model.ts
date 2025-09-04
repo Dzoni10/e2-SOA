@@ -5,7 +5,7 @@ export interface Blog {
     createdAt?: Date;
     images?: string[];
     creatorID: number;
-
+    username?: string;  
     // stiglo iz backenda
     likes?: { userId: number, createdAt: Date }[];
 

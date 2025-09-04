@@ -22,7 +22,7 @@ export class BlogsService {
     formData.append('title', blogData.title);
     formData.append('description', blogData.description);
     formData.append('creatorID', blogData.creatorID.toString());
-    
+    formData.append('username', blogData.username || '');
     for (let i = 0; i < images.length; i++) {
       formData.append('images', images[i]);
     }
