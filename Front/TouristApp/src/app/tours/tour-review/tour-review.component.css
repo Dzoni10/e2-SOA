@@ -1,0 +1,78 @@
+.reviews-container {
+  max-width: 700px;
+  margin: 20px auto;
+  padding: 20px;
+}
+
+.review-card {
+  max-width: 700px;      
+  margin: 15px auto;     
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.rating-stars {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.rating-stars mat-icon {
+  font-size: 24px;
+  color: #ccc;
+}
+
+.rating-stars mat-icon.filled {
+  color: #FFD700;
+}
+
+.review-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.review-text {
+  flex: 1;
+  margin-right: 20px;
+}
+
+.review-images {
+  width: 200px; /* ili koliko želiš */
+}
+
+.image-slider {
+  position: relative;
+}
+
+.image-slider img {
+  display: none;
+  width: 100%;
+  border-radius: 8px;
+}
+
+.image-slider img.active {
+  display: block;
+}
+
+.image-slider button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.image-slider button:first-of-type {
+  left: 0;
+}
+
+.image-slider button:last-of-type {
+  right: 0;
+}
+
