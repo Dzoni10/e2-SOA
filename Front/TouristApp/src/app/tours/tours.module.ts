@@ -15,6 +15,8 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { FormsModule } from '@angular/forms';
 import { AddReviewComponent } from './add-review/add-review.component';
 import { TourReviewComponent } from './tour-review/tour-review.component';
+import { AddKeypointComponent } from './add-keypoint/add-keypoint.component';
+import { MatDialogModule } from '@angular/material/dialog';
 
 
 
@@ -23,7 +25,8 @@ import { TourReviewComponent } from './tour-review/tour-review.component';
     TourCreationComponent,
     ToursListComponent,
     AddReviewComponent,
-    TourReviewComponent
+    TourReviewComponent,
+    AddKeypointComponent
   ],
   imports: [
     CommonModule,
@@ -37,7 +40,8 @@ import { TourReviewComponent } from './tour-review/tour-review.component';
     ReactiveFormsModule,
     MatCardModule,
     MatGridListModule,
-    FormsModule
+    FormsModule,
+    MatDialogModule
   ]
 })
 export class ToursModule { }

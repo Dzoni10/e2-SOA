@@ -26,7 +26,7 @@ type Tour struct {
 	Name        string             `bson:"name,omitempty" json:"name"`
 	Description string             `bson:"description,omitempty" json:"description"`
 	Difficulty  TourDifficulty     `bson:"difficulty" json:"difficulty"`
-	Tags        string             `bson:"tags,omitempty" json:"tags"`
+	Tags        []string           `bson:"tags,omitempty" json:"tags"`
 	Status      Status             `bson:"status" json:"status"`
 	Cost        float64            `bson:"cost" json:"cost"`
 	TourLength  float64            `bson:"tourLength" json:"tourLength"`

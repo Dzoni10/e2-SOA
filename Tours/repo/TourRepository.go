@@ -49,3 +49,10 @@ func (r *TourRepository) Create(tour *model.Tour) error {
 	_, err := database.TourCollection.InsertOne(ctx, tour)
 	return err
 }
+
+func (r *TourRepository) UpdateLength(tourID primitive.ObjectID, length float64) error {
+	filter := bson.M{"_id": tourID}
+	update := bson.M{"$set": bson.M{"tourLength": length}}
+	_, err := database.TourCollection.UpdateOne(context.TODO(), filter, update)
+	return err
+}

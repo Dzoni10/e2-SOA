@@ -17,6 +17,7 @@ import { FollowersModule } from './followers/followers.module';
 
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './auth/interceptor-jwt/auth.interceptor';
+import {  MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
   declarations: [
@@ -32,8 +33,8 @@ import { AuthInterceptor } from './auth/interceptor-jwt/auth.interceptor';
     BrowserAnimationsModule,
     MatSnackBarModule,
     StakeholdersModule,
-    AuthModule,
     MatCardModule,
+    MatDialogModule,
     ToursModule,
     BlogsModule,
     FollowersModule
