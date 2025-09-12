@@ -79,5 +79,9 @@ export class ToursListComponent implements OnInit {
     }
     this.router.navigate(['/tours', tourId, 'reviews']);
   }
+
+  tourDetails(tourId: string | undefined) {
+    this.router.navigate(['/tours', tourId]);
+  }
   
 }

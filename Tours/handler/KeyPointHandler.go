@@ -15,6 +15,7 @@ import (
 	"tours/service"
 
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -469,4 +470,68 @@ func (h *KeyPointHandler) DeleteKeyPoint(w http.ResponseWriter, r *http.Request)
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Keypoint deleted successfully",
 	})
+}
+
+func (h *KeyPointHandler) UpdateKeypoint(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	kpID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		http.Error(w, "Invalid keypoint ID", http.StatusBadRequest)
+		return
+	}
+
+	if err := r.ParseMultipartForm(20 << 20); err != nil {
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		return
+	}
+
+	name := r.FormValue("name")
+	desc := r.FormValue("description")
+	lat, _ := strconv.ParseFloat(r.FormValue("latitude"), 64)
+	lon, _ := strconv.ParseFloat(r.FormValue("longitude"), 64)
+
+	// Handle image uploads
+	var imagePaths []string
+	files := r.MultipartForm.File["images"]
+	for _, fileHeader := range files {
+		file, err := fileHeader.Open()
+		if err != nil {
+			http.Error(w, "Failed to open uploaded file", http.StatusBadRequest)
+			return
+		}
+		defer file.Close()
+
+		// Save file locally (adjust path if needed)
+		path := fmt.Sprintf("uploads/keypoints/%s", fileHeader.Filename)
+		dst, err := os.Create(path)
+		if err != nil {
+			http.Error(w, "Failed to save file", http.StatusInternalServerError)
+			return
+		}
+		defer dst.Close()
+		if _, err := io.Copy(dst, file); err != nil {
+			http.Error(w, "Failed to write file", http.StatusInternalServerError)
+			return
+		}
+
+		imagePaths = append(imagePaths, path)
+	}
+
+	update := bson.M{
+		"$set": bson.M{
+			"name":        name,
+			"description": desc,
+			"latitude":    lat,
+			"longitude":   lon,
+			"images":      imagePaths, // overwrite images
+		},
+	}
+
+	if err := h.Service.UpdateKeypoint(kpID, update); err != nil {
+		http.Error(w, "Failed to update keypoint", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"status": "updated"})
 }

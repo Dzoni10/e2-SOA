@@ -27,6 +27,10 @@ export class ToursService {
     return this.http.get<Tour[]>(`${this.apiUrl}/all`);
   }
 
+  getTourByID(tourId: string): Observable<Tour>{
+    return this.http.get<Tour>(`${this.apiUrl}/${tourId}`);
+  }
+
   addReviewWithImages(review: Review, files: File[]): Observable<Review> {
     const formData = new FormData();
     formData.append('tourId', review.tourId);
@@ -44,10 +48,28 @@ export class ToursService {
     return this.http.get<Review[]>(`http://localhost:8081/tours/${tourId}/reviews`);
   }
 
+  getKeyPointsForTour(tourId: string): Observable<Keypoint[]>{
+    return this.http.get<Keypoint[]>(`${this.apiUrl}/${tourId}/keypoints`);
+  }
+
   // Keypoint operations
   createKeypoint(keypointFormData: FormData): Observable<{ id: string, name: string, order: number }> {
     return this.http.post<{ id: string, name: string, order: number }>(`${this.apiUrl}/keypoints`, keypointFormData);
   }
+
+  updateKeypoint(id: string, formData: FormData): Observable<Keypoint> {
+  return this.http.put<Keypoint>(`${this.apiUrl}/keypoints/${id}`, formData);
+}
+/*
+createKeypoint(formData: FormData): Observable<Keypoint> {
+  return this.http.post<Keypoint>(`${this.apiUrl}/keypoints`, formData);
+}
+  
+
+getKeypointsByTourId(tourId: string): Observable<Keypoint[]> {
+  return this.http.get<Keypoint[]>(`${this.apiUrl}/tours/${tourId}/keypoints`);
+}
+  */
   /*
   createKeypoint(keypoint: Keypoint): Observable<{ id: string; name: string; order: number }> {
   let payload: FormData;

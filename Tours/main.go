@@ -44,6 +44,7 @@ func main() {
 	r.HandleFunc("/tours/keypoints", keypointHandler.CreateKeyPoint).Methods("POST")                               // Changed from /tours/keypoints
 	r.HandleFunc("/tours/keypoints/bulk-update-tour-id", keypointHandler.BulkUpdateKeyPointsTourId).Methods("PUT") // Added missing route
 	r.HandleFunc("/keypoints/{id}/update-tour-id", keypointHandler.UpdateKeyPointTourId).Methods("PUT")            // Optional individual update
+	r.HandleFunc("/tours/keypoints/{id}", keypointHandler.UpdateKeypoint).Methods("PUT")                           // Optional individual update
 	r.HandleFunc("/tours/{id}/keypoints", keypointHandler.GetKeyPointsForTour).Methods("GET")
 	r.HandleFunc("/keypoints/{id}", keypointHandler.DeleteKeyPoint).Methods("DELETE")
 	r.HandleFunc("/keypoints/{id}/order", keypointHandler.UpdateKeyPointOrder).Methods("PUT")

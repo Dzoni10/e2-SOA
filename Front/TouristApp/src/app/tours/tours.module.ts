@@ -17,6 +17,7 @@ import { AddReviewComponent } from './add-review/add-review.component';
 import { TourReviewComponent } from './tour-review/tour-review.component';
 import { AddKeypointComponent } from './add-keypoint/add-keypoint.component';
 import { MatDialogModule } from '@angular/material/dialog';
+import { TourDetailsComponent } from './tour-details/tour-details.component';
 
 
 
@@ -26,7 +27,8 @@ import { MatDialogModule } from '@angular/material/dialog';
     ToursListComponent,
     AddReviewComponent,
     TourReviewComponent,
-    AddKeypointComponent
+    AddKeypointComponent,
+    TourDetailsComponent
   ],
   imports: [
     CommonModule,

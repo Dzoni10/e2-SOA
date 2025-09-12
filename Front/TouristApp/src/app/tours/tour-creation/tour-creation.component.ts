@@ -121,7 +121,7 @@ export class TourCreationComponent implements OnInit {
       latitude: keypointData.latitude,
       longitude: keypointData.longitude,
       images: keypointData.images,
-      formData: keypointData.formData
+      formData: keypointData.formData,
     };
 
     this.keypoints.push(keypoint);
@@ -179,7 +179,7 @@ export class TourCreationComponent implements OnInit {
 
     const createdKeypoints = await Promise.all(keypointRequests);
     await this.tourService.updateTourLength(tourId).toPromise();
-    
+
     this.snackBar.open('Tour and keypoints created successfully', 'Close', { duration: 3000 });
     
     this.resetForm();

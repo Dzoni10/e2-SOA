@@ -4,6 +4,7 @@ import (
 	"tours/model"
 	"tours/repo"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -60,4 +61,8 @@ func (s *KeyPointService) RemoveImage(keyPointID primitive.ObjectID, imagePath s
 
 func (s *KeyPointService) Delete(keyPointID primitive.ObjectID) error {
 	return s.Repo.Delete(keyPointID)
+}
+
+func (s *KeyPointService) UpdateKeypoint(id primitive.ObjectID, update bson.M) error {
+	return s.Repo.UpdateKeypoint(id, update)
 }

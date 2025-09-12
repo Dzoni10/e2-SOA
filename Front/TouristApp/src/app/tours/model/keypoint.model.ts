@@ -5,6 +5,8 @@ export interface Keypoint {
   description: string;
   latitude: number;
   longitude: number;
+  order?: number;
   images: string[];
   formData?: FormData;
+  marker?: L.Marker; // optional property
 }

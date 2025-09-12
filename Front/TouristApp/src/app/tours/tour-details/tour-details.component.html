@@ -1,0 +1,29 @@
+<div class="tour-info">
+  <h2>{{ tour.name }}</h2>
+  <p>{{ tour.description }}</p>
+  <p><strong>Difficulty:</strong> {{ tour.difficulty }}</p>
+  <p><strong>Tags:</strong> {{ tour.tags?.join(', ') }}</p>
+</div>
+
+<div class="map-wrapper">
+  <div #mapContainer class="map"></div>
+</div>
+
+<div class="keypoints-list">
+  <h3>Keypoints</h3>
+  <mat-card *ngFor="let kp of keypoints; let i = index">
+    <mat-card-header>
+      <mat-card-title>{{ i + 1 }}. {{ kp.name }}</mat-card-title>
+      <button mat-icon-button (click)="deleteKeypoint(kp)">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+      <p>{{ kp.description }}</p>
+      <p>Lat: {{ kp.latitude }}, Lng: {{ kp.longitude }}</p>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<button mat-raised-button color="primary" (click)="saveTourUpdates()">Save Changes</button>
+

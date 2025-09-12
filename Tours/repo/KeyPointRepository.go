@@ -180,3 +180,11 @@ func (r *KeyPointRepository) Delete(keyPointID primitive.ObjectID) error {
 	_, err := r.Collection.DeleteOne(context.TODO(), filter)
 	return err
 }
+
+func (r *KeyPointRepository) UpdateKeypoint(id primitive.ObjectID, update bson.M) error {
+	_, err := r.Collection.UpdateOne(context.TODO(),
+		bson.M{"_id": id},
+		update,
+	)
+	return err
+}
