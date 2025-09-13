@@ -48,7 +48,7 @@ export class TourDetailsComponent implements OnInit {
 
   initMap() {
     if (!this.mapContainer) return;
-
+    console.log("mapa tura")
     this.map = L.map(this.mapContainer.nativeElement).setView([44.817, 20.456], 12);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
@@ -259,7 +259,7 @@ createKeypoint(lat: number, lng: number) {
     formData.append("longitude", kp.longitude.toString());
     formData.append("order", index.toString()); // 👈 maintain order
     formData.append("tourId", this.tour.id!);
-    
+
     if (kp.images) {
       formData.append("images", String(kp.images));
     }

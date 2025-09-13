@@ -4,6 +4,7 @@ import { Tour } from './model/tour.model';
 import { Review } from './model/review.model'
 import { Observable } from 'rxjs';
 import { Keypoint } from './model/keypoint.model';
+import { Position } from './model/position.model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +12,7 @@ import { Keypoint } from './model/keypoint.model';
 export class ToursService {
 
   private apiUrl = 'http://localhost:8081/tours'
+  private api = 'http://localhost:8081'
   constructor(private http: HttpClient) { }
 
   createTour(tour: Tour): Observable<Tour>{
@@ -105,5 +107,17 @@ getKeypointsByTourId(tourId: string): Observable<Keypoint[]> {
 
   updateTourLength(tourId: string): Observable<{status: string}> {
     return this.http.put<{status: string}>(`${this.apiUrl}/${tourId}/update-length`, {});
+  }
+
+  getPosition(userId: number): Observable<Position>{
+    return this.http.get<Position>(`${this.api}/position/${userId}`);
+  }
+
+  initializePosition(userId: number, position: Position): Observable<Position>{
+    return this.http.post<Position>(`${this.api}/position/${userId}/create`, position);
+  }
+
+  updatePosition(userId: number, position: Position): Observable<Position>{
+    return this.http.put<Position>(`${this.api}/position/${userId}/update`, position);
   }
 }

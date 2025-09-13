@@ -15,6 +15,7 @@ var Client *mongo.Client
 var TourCollection *mongo.Collection
 var ReviewCollection *mongo.Collection
 var KeyPointCollection *mongo.Collection
+var PositionCollection *mongo.Collection
 
 func Init() {
 	uri := os.Getenv("MONGO_URI")
@@ -53,4 +54,5 @@ func Init() {
 	TourCollection = client.Database(dbName).Collection(collName)
 	ReviewCollection = client.Database(dbName).Collection("Reviews")
 	KeyPointCollection = client.Database(dbName).Collection("Keypoints")
+	PositionCollection = client.Database(dbName).Collection("Positions")
 }

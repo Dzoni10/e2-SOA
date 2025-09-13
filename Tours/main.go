@@ -28,6 +28,10 @@ func main() {
 	reviewSrv := &service.ReviewService{Repo: reviewRepo}
 	reviewHandler := &handler.ReviewHandler{Service: reviewSrv}
 
+	positionRepo := &repo.PositionRepository{}
+	positionSrv := &service.PositionService{Repo: positionRepo}
+	positionHandler := &handler.PositionHandler{Service: positionSrv}
+
 	r := mux.NewRouter()
 
 	r.HandleFunc("/tours/all", h.GetAllTours).Methods("GET")
@@ -52,6 +56,10 @@ func main() {
 	r.HandleFunc("/keypoints/{id}/add-image", keypointHandler.AddImageToKeyPoint).Methods("POST")
 	r.HandleFunc("/keypoints/{id}/remove-image", keypointHandler.RemoveImageFromKeyPoint).Methods("DELETE")
 	r.HandleFunc("/uploads/keypoints/{filename}", keypointHandler.ServeImage).Methods("GET")
+
+	r.HandleFunc("/position/{id}", positionHandler.GetPosition).Methods("GET")
+	r.HandleFunc("/position/{id}/create", positionHandler.InitializePosition).Methods("POST")
+	r.HandleFunc("/position/{id}/update", positionHandler.UpdatePosition).Methods("PUT")
 
 	corsHandler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:4200"},

@@ -1,0 +1,13 @@
+<div class="position">
+  <h2>position</h2>
+  <p><strong>Latitude:</strong> {{ position.latitude }}</p>
+  <p><strong>Longitude:</strong> {{ position.longitude }}</p>
+</div>
+
+<div class="map-wrapper">
+  <div #mapContainer class="map"></div>
+</div>
+
+<button mat-raised-button color="primary" (click)="savePosition()">Save Changes</button>
+
+
