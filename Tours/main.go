@@ -9,7 +9,6 @@ import (
 	"tours/service"
 
 	"github.com/gorilla/mux"
-	"github.com/rs/cors"
 )
 
 func main() {
@@ -61,13 +60,13 @@ func main() {
 	r.HandleFunc("/position/{id}/create", positionHandler.InitializePosition).Methods("POST")
 	r.HandleFunc("/position/{id}/update", positionHandler.UpdatePosition).Methods("PUT")
 
-	corsHandler := cors.New(cors.Options{
+	/*corsHandler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:4200"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "UPDATE", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
-	})
+	})*/
 
 	log.Println("Server running on port 8081")
-	log.Fatal(http.ListenAndServe(":8081", corsHandler.Handler(r)))
+	log.Fatal(http.ListenAndServe(":8081", r))
 }
