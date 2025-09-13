@@ -10,7 +10,6 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/rs/cors"
 )
 
 func main() {
@@ -30,13 +29,14 @@ func main() {
 	router.HandleFunc("/users/{id}/block", userHandler.BlockUser).Methods("GET")
 	router.HandleFunc("/users/editProfile", userHandler.UpdateUserProfile).Methods("PUT")
 
-	corsHandler := cors.New(cors.Options{
+	/*corsHandler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:4200"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
-	})
+	})*/
 
 	log.Println("Server starting at port 8080...")
-	log.Fatal(http.ListenAndServe(":8080", corsHandler.Handler(router)))
+	//log.Fatal(http.ListenAndServe(":8080", corsHandler.Handler(router)))
+	log.Fatal(http.ListenAndServe(":8080", router))
 }

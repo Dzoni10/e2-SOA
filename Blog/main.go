@@ -9,7 +9,6 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/rs/cors"
 )
 
 func main() {
@@ -49,13 +48,13 @@ func main() {
 	r.HandleFunc("/blogs/{id}/likes/count", likeHandler.CountLikes).Methods("GET")
 	r.HandleFunc("/blogs/{id}/likes/{userId}", likeHandler.HasUserLiked).Methods("GET")
 
-	corsHandler := cors.New(cors.Options{
+	/*corsHandler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:4200"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "UPDATE", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
 	})
-
+	*/
 	log.Println("Blog server running on port 8082")
-	log.Fatal(http.ListenAndServe(":8082", corsHandler.Handler(r)))
+	log.Fatal(http.ListenAndServe(":8082", r))
 }

@@ -19,11 +19,11 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<DecodedToken | null>(this.loadUserFromToken());
   currentUser$ = this.currentUserSubject.asObservable();
 
-  private apiUrl = 'http://localhost:8080/users'
+  private apiUrl = 'http://localhost:8070/users'
   constructor(private http: HttpClient) { }
 
   register(registration: Register): Observable<any>{
-    return this.http.post('http://localhost:8080/users',registration);
+    return this.http.post('http://localhost:8070/users',registration);
   }
 
   login(username: string, password: string){

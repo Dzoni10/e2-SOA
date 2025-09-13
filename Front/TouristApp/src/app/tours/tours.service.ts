@@ -11,8 +11,8 @@ import { Position } from './model/position.model';
 })
 export class ToursService {
 
-  private apiUrl = 'http://localhost:8081/tours'
-  private api = 'http://localhost:8081'
+  private apiUrl = 'http://localhost:8070/tours'
+  private api = 'http://localhost:8070'
   constructor(private http: HttpClient) { }
 
   createTour(tour: Tour): Observable<Tour>{

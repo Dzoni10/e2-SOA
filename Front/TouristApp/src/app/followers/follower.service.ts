@@ -40,7 +40,7 @@ export interface RecommendationsResponse {
   providedIn: 'root'
 })
 export class FollowerService {
-  private apiUrl = 'http://localhost:8083';
+  private apiUrl = 'http://localhost:8070';
 
   constructor(private http: HttpClient) { }
 
