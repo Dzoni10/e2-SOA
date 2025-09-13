@@ -1,0 +1,107 @@
+<div class="keypoint-modal">
+    <div class="modal-header">
+        <h2 mat-dialog-title>Add Tour Keypoint</h2>
+        <button mat-icon-button mat-dialog-close>
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <mat-dialog-content class="modal-content">
+        <form [formGroup]="keypointForm" class="keypoint-form">
+            <div class="form-section">
+                <h3>Keypoint Details</h3>
+                
+                <mat-form-field>
+                    <mat-label>Keypoint Name</mat-label>
+                    <input matInput formControlName="name" placeholder="Enter keypoint name"/>
+                </mat-form-field>
+
+                <mat-form-field>
+                    <mat-label>Description</mat-label>
+                    <textarea matInput formControlName="description" 
+                              placeholder="Describe this location..." 
+                              rows="3"></textarea>
+                </mat-form-field>
+
+                <div class="coordinates-row">
+                    <mat-form-field>
+                        <mat-label>Latitude</mat-label>
+                        <input matInput formControlName="latitude" 
+                               type="number" 
+                               step="any"
+                               placeholder="0.000000"/>
+                    </mat-form-field>
+
+                    <mat-form-field>
+                        <mat-label>Longitude</mat-label>
+                        <input matInput formControlName="longitude" 
+                               type="number" 
+                               step="any"
+                               placeholder="0.000000"/>
+                    </mat-form-field>
+                </div>
+
+                <button type="button" 
+                        mat-stroked-button 
+                        color="primary" 
+                        (click)="getCurrentLocation()"
+                        [disabled]="gettingLocation">
+                    <mat-icon>my_location</mat-icon>
+                    {{gettingLocation ? 'Getting Location...' : 'Use Current Location'}}
+                </button>
+            </div>
+
+            <div class="map-section">
+                <h3>Select Location on Map</h3>
+                <div class="map-container">
+                    <div #mapContainer class="map"></div>
+                </div>
+                <p class="map-instructions">Click on the map to set keypoint location</p>
+            </div>
+
+            <div class="images-section">
+                <h3>Images</h3>
+                <div class="file-upload">
+                    <input type="file" 
+                           #fileInput 
+                           multiple 
+                           accept="image/*" 
+                           (change)="onFilesSelected($event)"
+                           class="file-input"/>
+                    
+                    <button type="button" 
+                            mat-raised-button 
+                            color="accent"
+                            (click)="fileInput.click()">
+                        <mat-icon>add_photo_alternate</mat-icon>
+                        Add Images
+                    </button>
+                </div>
+
+                <div class="selected-images" *ngIf="selectedImages.length > 0">
+                    <div *ngFor="let image of selectedImages; let i = index" class="image-preview">
+                        <img [src]="image.preview" [alt]="image.file.name"/>
+                        <button type="button" 
+                                mat-icon-button 
+                                class="remove-image"
+                                (click)="removeImage(i)">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions class="modal-actions">
+        <button type="button" mat-button mat-dialog-close>Cancel</button>
+        <button type="button" 
+                mat-raised-button 
+                color="primary"
+                (click)="addKeypoint()"
+                [disabled]="!keypointForm.valid || isSubmitting">
+            {{isSubmitting ? 'Adding...' : 'Add Keypoint'}}
+        </button>
+    </mat-dialog-actions>
+</div>
+

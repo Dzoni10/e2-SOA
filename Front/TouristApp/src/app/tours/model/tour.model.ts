@@ -4,7 +4,7 @@ export interface Tour
     name: string,
     description: string,
     difficulty: number,
-    tags: string,
+    tags: string[],
     status: number,
     cost: number,
     tourLength: number,

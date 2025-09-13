@@ -1,0 +1,17 @@
+.map-wrapper {
+  height: 500px;
+  margin-bottom: 20px;
+}
+
+.map {
+  width: 100%;
+  height: 100%;
+}
+
+.keypoints-list mat-card {
+  margin-bottom: 10px;
+}
+
+.tour-info {
+  margin-bottom: 15px;
+}

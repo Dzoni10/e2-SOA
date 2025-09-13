@@ -1,5 +1,5 @@
 
-<form [formGroup]="tourCreationForm" (ngSubmit)="create()">
+<form [formGroup]="tourCreationForm" (ngSubmit)="createNew()">
     <div class="form-container">
         <mat-form-field>
             <mat-label>Tour name</mat-label>
@@ -33,7 +33,40 @@
                    (matChipInputTokenEnd)="addTag($event)"
             />
         </mat-form-field>
-
+        <!-- Keypoints Section -->
+        <div class="keypoints-section">
+            <div class="keypoints-header">
+                <h3>Tour Keypoints</h3>
+                <button type="button" mat-raised-button color="accent" (click)="openKeypointModal()">
+                    <mat-icon>add_location</mat-icon>
+                    Add Keypoint
+                </button>
+            </div>
+            
+            <!-- Preview existing keypoints -->
+            <div class="keypoints-preview" *ngIf="keypoints.length > 0">
+                <mat-card *ngFor="let keypoint of keypoints; let i = index" class="keypoint-card">
+                    <mat-card-header>
+                        <mat-card-title>{{i + 1}}. {{keypoint.name}}</mat-card-title>
+                        <mat-card-subtitle>{{keypoint.latitude}}, {{keypoint.longitude}}</mat-card-subtitle>
+                        <button mat-icon-button class="remove-keypoint" (click)="removeKeypoint(i)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <p>{{keypoint.description}}</p>
+                        <div class="keypoint-images" *ngIf="keypoint.images && keypoint.images.length > 0">
+                            <img *ngFor="let image of keypoint.images" [src]="image" class="keypoint-preview-image"/>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+            
+            <div class="no-keypoints" *ngIf="keypoints.length === 0">
+                <mat-icon>location_off</mat-icon>
+                <p>No keypoints added yet. Click "Add Keypoint" to start building your tour route.</p>
+            </div>
+        </div>
     <button class="add-update" color="primary" type="submit" mat-raised-button>Create Tour</button>
     </div>
 </form>
