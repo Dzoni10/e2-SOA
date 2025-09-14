@@ -40,7 +40,7 @@ func (h *KeyPointHandler) CreateKeyPoint(w http.ResponseWriter, r *http.Request)
 	defer func() {
 		if rec := recover(); rec != nil {
 			log.Println("❌ Panic recovered:", rec)
-			w.Header().Set("Content-Type", "application/json")
+			//w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]string{
 				"error": fmt.Sprintf("%v", rec),
@@ -51,9 +51,9 @@ func (h *KeyPointHandler) CreateKeyPoint(w http.ResponseWriter, r *http.Request)
 	log.Println("➡️ CreateKeyPoint called, method:", r.Method)
 
 	// CORS headers
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	//w.Header().Set("Access-Control-Allow-Origin", "*")
+	//w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	//w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 	if r.Method == http.MethodOptions {
 		w.WriteHeader(http.StatusOK)
@@ -168,7 +168,7 @@ func (h *KeyPointHandler) CreateKeyPoint(w http.ResponseWriter, r *http.Request)
 	}
 
 	// Respond with JSON
-	w.Header().Set("Content-Type", "application/json")
+	//w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"id":          keypoint.ID.Hex(),
 		"name":        keypoint.Name,
@@ -192,9 +192,9 @@ func (h *KeyPointHandler) CreateKeyPoint(w http.ResponseWriter, r *http.Request)
 // Update keypoint with tourId and reorder - used after tour creation
 func (h *KeyPointHandler) UpdateKeyPointTourId(w http.ResponseWriter, r *http.Request) {
 	// Enable CORS
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "PUT, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	//w.Header().Set("Access-Control-Allow-Origin", "*")
+	//w.Header().Set("Access-Control-Allow-Methods", "PUT, OPTIONS")
+	//w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 	if r.Method == "OPTIONS" {
 		w.WriteHeader(http.StatusOK)
@@ -225,7 +225,7 @@ func (h *KeyPointHandler) UpdateKeyPointTourId(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	//w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Keypoint updated successfully",
 	})
@@ -234,9 +234,9 @@ func (h *KeyPointHandler) UpdateKeyPointTourId(w http.ResponseWriter, r *http.Re
 // Bulk update keypoints with tourId - used after tour creation
 func (h *KeyPointHandler) BulkUpdateKeyPointsTourId(w http.ResponseWriter, r *http.Request) {
 	// Enable CORS
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "PUT, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	//w.Header().Set("Access-Control-Allow-Origin", "*")
+	//w.Header().Set("Access-Control-Allow-Methods", "PUT, OPTIONS")
+	//w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 	if r.Method == "OPTIONS" {
 		w.WriteHeader(http.StatusOK)
@@ -275,7 +275,7 @@ func (h *KeyPointHandler) BulkUpdateKeyPointsTourId(w http.ResponseWriter, r *ht
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	//w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Keypoints updated successfully",
 	})
@@ -405,7 +405,7 @@ func (h *KeyPointHandler) UpdateKeyPointOrder(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	//w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Keypoint order updated successfully",
 	})
@@ -430,7 +430,7 @@ func (h *KeyPointHandler) BulkReorderKeyPoints(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	//w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Keypoints reordered successfully",
 	})
@@ -466,7 +466,7 @@ func (h *KeyPointHandler) DeleteKeyPoint(w http.ResponseWriter, r *http.Request)
 		os.Remove(filepath.Join("uploads/keypoints", filename))
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	//w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Keypoint deleted successfully",
 	})

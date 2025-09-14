@@ -7,7 +7,7 @@ import { Comment } from './model/comment.model';
   providedIn: 'root'
 })
 export class CommentService {
-  private baseUrl = 'http://localhost:8082'; // Blog backend
+  private baseUrl = 'http://localhost:8070'; // Blog backend
 
   constructor(private http: HttpClient) {}
 
