@@ -21,7 +21,7 @@ type TourHandler struct {
 func (h *TourHandler) GetAllTours(w http.ResponseWriter, r *http.Request) {
 	tours, err := h.Service.GetAllTours()
 
-	w.Header().Set("Content-Type", "application/json")
+	//w.Header().Set("Content-Type", "application/json")
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -45,7 +45,7 @@ func (h *TourHandler) GetTour(w http.ResponseWriter, r *http.Request) {
 
 	tour, err := h.Service.GetTour(objID)
 
-	w.Header().Set("Content-Type", "application/json")
+	//w.Header().Set("Content-Type", "application/json")
 
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -111,7 +111,7 @@ func (h *TourHandler) CreateTour(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Return the real MongoDB ID only
-	w.Header().Set("Content-Type", "application/json")
+	//w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{
 		"id": tour.ID.Hex(),
@@ -136,7 +136,7 @@ func (h *TourHandler) UpdateLength(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("Length updated successfully")
 
-	w.Header().Set("Content-Type", "application/json")
+	//w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"status": "length updated"})
 }

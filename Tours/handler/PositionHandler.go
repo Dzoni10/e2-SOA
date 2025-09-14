@@ -69,7 +69,7 @@ func (h *PositionHandler) InitializePosition(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	//w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(position)
 }
 
@@ -82,7 +82,7 @@ func (h *PositionHandler) GetPosition(w http.ResponseWriter, r *http.Request) {
 
 	position, err := h.Service.GetPosition(userId)
 
-	w.Header().Set("Content-Type", "application/json")
+	//w.Header().Set("Content-Type", "application/json")
 
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)

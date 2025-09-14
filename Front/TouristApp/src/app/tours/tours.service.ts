@@ -43,11 +43,11 @@ export class ToursService {
 
     files.forEach(file => formData.append('images', file));
 
-    return this.http.post<Review>(`http://localhost:8081/reviews`, formData);
+    return this.http.post<Review>(`http://localhost:8070/reviews`, formData);
   }
 
   getReviewsForTour(tourId: string): Observable<Review[]> {
-    return this.http.get<Review[]>(`http://localhost:8081/tours/${tourId}/reviews`);
+    return this.http.get<Review[]>(`http://localhost:8070/tours/${tourId}/reviews`);
   }
 
   getKeyPointsForTour(tourId: string): Observable<Keypoint[]>{
