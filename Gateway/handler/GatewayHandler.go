@@ -30,9 +30,12 @@ func (h *GatewayHandler) HandleBlog(w http.ResponseWriter, r *http.Request) {
 	proxy.ServeHTTP(w, r)
 }
 
-// STAKEHOLDERS servis (8080)
 func (h *GatewayHandler) HandleStakeholders(w http.ResponseWriter, r *http.Request) {
-	proxyRequest(w, r, "/users", "http://localhost:8080")
+	proxy := httputil.NewSingleHostReverseProxy(&url.URL{
+		Scheme: "http",
+		Host:   "localhost:8080",
+	})
+	proxy.ServeHTTP(w, r)
 }
 func (h *GatewayHandler) HandleFollowers(w http.ResponseWriter, r *http.Request) {
 	proxyRequest(w, r, "/followers", "http://localhost:8083")
