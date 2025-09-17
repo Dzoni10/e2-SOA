@@ -1,0 +1,16 @@
+<div class="tour-execution">
+  <h2 *ngIf="tour">{{tour?.name}}</h2>
+
+  <div id="map" class="map"></div>
+
+  <div class="controls">
+    <button mat-stroked-button color="primary"
+    [disabled] = "!canFinish" (click)="finish()">Finish Tour</button>
+    <button mat-stroked-button color="warn" (click)="abandon()">Abandon Tour</button>
+  </div>
+
+  <div class="progress">
+    <mat-progress-bar mode="determinate" [value]="execution?.completedPercent || 0"></mat-progress-bar>
+    <p>{{execution?.completedPercent | number:'1.0-0'}}% completed</p>
+  </div>
+</div>

@@ -5,6 +5,7 @@ import { Review } from './model/review.model'
 import { Observable } from 'rxjs';
 import { Keypoint } from './model/keypoint.model';
 import { Position } from './model/position.model';
+import { TourExecution } from './model/tour-execution';
 
 @Injectable({
   providedIn: 'root'
@@ -120,4 +121,45 @@ getKeypointsByTourId(tourId: string): Observable<Keypoint[]> {
   updatePosition(userId: number, position: Position): Observable<Position>{
     return this.http.put<Position>(`${this.api}/position/${userId}/update`, position);
   }
+
+
+  //tour Execution
+
+  startTour(tourId: string, touristId: number, lat: number, lon: number): Observable<TourExecution> {
+    return this.http.post<TourExecution>(`${this.api}/tour-executions/start`, {
+      tourId,
+      touristId,
+      latitude: lat,
+      longitude: lon
+    });
+  }
+
+  finishTour(executionId: string): Observable<void> {
+    return this.http.put<void>(`${this.api}/tour-executions/${executionId}/finish`, {});
+  }
+
+  abandonTour(executionId: string): Observable<void> {
+    return this.http.put<void>(`${this.api}/tour-executions/${executionId}/abandon`, {});
+  }
+
+
+  updateLocation(executionId: string, lat: number, lon: number): Observable<void> {
+    return this.http.put<void>(`${this.api}/tour-executions/${executionId}/update-location`, {
+      latitude: lat,
+      longitude: lon
+    });
+  }
+
+  addCompletedKeyPoint(executionId: string, keyPointId: string, totalKeyPoints: number): Observable<void> {
+    return this.http.put<void>(`${this.api}/tour-executions/${executionId}/add-keypoint`, {
+      keyPointId,
+      totalKeyPoints
+    });
+  }
+
+  getExecutionById(executionId: string): Observable<TourExecution> {
+    return this.http.get<TourExecution>(`${this.api}/tour-executions/${executionId}`);
+  }
+
+
 }
