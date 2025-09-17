@@ -56,3 +56,67 @@ func (r *TourRepository) UpdateLength(tourID primitive.ObjectID, length float64)
 	_, err := database.TourCollection.UpdateOne(context.TODO(), filter, update)
 	return err
 }
+
+func (r *TourRepository) UpdateStatus(tourID primitive.ObjectID, status model.Status) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	now := time.Now()
+	filter := bson.M{"_id": tourID}
+
+	update := bson.M{
+		"$set": bson.M{
+			"status":    status,
+			"updatedAt": now,
+		},
+	}
+
+	switch status {
+	case model.Published:
+		update["$set"].(bson.M)["publishedAt"] = now
+		update["$unset"] = bson.M{"archivedAt": ""}
+	case model.Archived:
+		update["$set"].(bson.M)["archivedAt"] = now
+	case model.Draft:
+		update["$unset"] = bson.M{
+			"publishedAt": "",
+			"archivedAt":  "",
+		}
+	}
+
+	_, err := database.TourCollection.UpdateOne(ctx, filter, update)
+	return err
+}
+
+func (r *TourRepository) UpdateLengthAndTimes(tourID primitive.ObjectID, length float64, walkingTime, bicycleTime, carTime int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	filter := bson.M{"_id": tourID}
+	update := bson.M{
+		"$set": bson.M{
+			"tourLength":  length,
+			"walkingTime": walkingTime,
+			"bicycleTime": bicycleTime,
+			"carTime":     carTime,
+			"updatedAt":   time.Now(),
+		},
+	}
+	_, err := database.TourCollection.UpdateOne(ctx, filter, update)
+	return err
+}
+func (r *TourRepository) UpdateCost(tourID primitive.ObjectID, cost float64) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	filter := bson.M{"_id": tourID}
+	update := bson.M{
+		"$set": bson.M{
+			"cost":      cost,
+			"updatedAt": time.Now(),
+		},
+	}
+
+	_, err := database.TourCollection.UpdateOne(ctx, filter, update)
+	return err
+}

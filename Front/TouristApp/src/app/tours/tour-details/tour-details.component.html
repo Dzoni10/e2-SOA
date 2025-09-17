@@ -1,8 +1,85 @@
-<div class="tour-info">
+<div class="tour-info" *ngIf="tour">
   <h2>{{ tour.name }}</h2>
   <p>{{ tour.description }}</p>
   <p><strong>Difficulty:</strong> {{ tour.difficulty }}</p>
   <p><strong>Tags:</strong> {{ tour.tags?.join(', ') }}</p>
+  
+  <!-- Dodaj Tour Metrics sekciju -->
+  <div class="tour-metrics" *ngIf="tour.tourLength && tour.tourLength > 0">
+    <h3>Tour Metrics</h3>
+    <div class="metrics-grid">
+      <div class="metric-item">
+        <mat-icon>straighten</mat-icon>
+        <span>Distance: {{ tour.tourLength | number:'1.2-2' }} km</span>
+      </div>
+      <div class="metric-item">
+        <mat-icon>directions_walk</mat-icon>
+        <span>Walking: {{ tour.walkingTime || 0 }} min</span>
+      </div>
+      <div class="metric-item">
+        <mat-icon>directions_bike</mat-icon>
+        <span>Cycling: {{ tour.bicycleTime || 0 }} min</span>
+      </div>
+      <div class="metric-item">
+        <mat-icon>directions_car</mat-icon>
+        <span>Driving: {{ tour.carTime || 0 }} min</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dodaj Cost editovanje -->
+  <div class="cost-section" *ngIf="canEditStatus">
+    <h4>Tour Cost</h4>
+    <mat-form-field appearance="outline">
+      <mat-label>Cost (EUR)</mat-label>
+      <input matInput 
+             type="number" 
+             [(ngModel)]="tour.cost"
+             min="0"
+             step="0.01">
+      <span matSuffix>€</span>
+    </mat-form-field>
+    <button mat-button (click)="updateTourCost()" color="primary">Update Cost</button>
+  </div>
+
+  <!-- Prikaz cost za non-editable -->
+  <div class="cost-display" *ngIf="!canEditStatus">
+    <p><strong>Cost:</strong> {{ tour.cost || 0 | currency:'EUR':'symbol':'1.2-2' }}</p>
+  </div>
+</div>
+
+<!-- Status Management Section -->
+<div class="status-section" *ngIf="tour">
+    <h3>Status Ture</h3>
+    <div class="status-info">
+        <p><strong>Trenutni Status:</strong> 
+            <span class="status-badge" [ngClass]="'status-' + tour.status">
+                {{ getStatusDisplayName() }}
+            </span>
+        </p>
+        
+        <div class="status-timestamps" *ngIf="statusInfo">
+            <p *ngIf="statusInfo.publishedAt"><strong>Objavljena:</strong> {{ statusInfo.publishedAt | date:'medium' }}</p>
+            <p *ngIf="statusInfo.archivedAt"><strong>Arhivirana:</strong> {{ statusInfo.archivedAt | date:'medium' }}</p>
+        </div>
+    </div>
+    
+    <!-- Status Action Buttons -->
+    <div class="status-actions" *ngIf="canEditStatus">
+        <button mat-raised-button color="primary" (click)="publishTour()" *ngIf="canPublish()">
+            Objavi Turu
+        </button>
+        <button mat-raised-button color="warn" (click)="archiveTour()" *ngIf="canArchive()">
+            Arhiviraj Turu
+        </button>
+        <button mat-raised-button color="accent" (click)="reactivateTour()" *ngIf="canReactivate()">
+            Reaktiviraj Turu
+        </button>
+    </div>
+    
+    <div class="no-permission-message" *ngIf="!canEditStatus">
+        <p><em>Samo autor ture može menjati status.</em></p>
+    </div>
 </div>
 
 <div class="map-wrapper">
@@ -26,4 +103,3 @@
 </div>
 
 <button mat-raised-button color="primary" (click)="saveTourUpdates()">Save Changes</button>
-

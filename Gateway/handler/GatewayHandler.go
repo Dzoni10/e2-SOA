@@ -41,7 +41,11 @@ func (h *GatewayHandler) HandleFollowers(w http.ResponseWriter, r *http.Request)
 	proxyRequest(w, r, "/followers", "http://localhost:8083")
 }
 func (h *GatewayHandler) HandleTours(w http.ResponseWriter, r *http.Request) {
-	proxyRequest(w, r, "/tours", "http://localhost:8081")
+	proxy := httputil.NewSingleHostReverseProxy(&url.URL{
+		Scheme: "http",
+		Host:   "localhost:8081",
+	})
+	proxy.ServeHTTP(w, r)
 }
 func (h *GatewayHandler) HandlePosition(w http.ResponseWriter, r *http.Request) {
 	proxyRequest(w, r, "/position", "http://localhost:8081")
@@ -54,5 +58,9 @@ func (h *GatewayHandler) HandleReviews(w http.ResponseWriter, r *http.Request) {
 	proxy.ServeHTTP(w, r)
 }
 func (h *GatewayHandler) HandleKeypoints(w http.ResponseWriter, r *http.Request) {
-	proxyRequest(w, r, "/keypoints", "http://localhost:8081")
+	proxy := httputil.NewSingleHostReverseProxy(&url.URL{
+		Scheme: "http",
+		Host:   "localhost:8081",
+	})
+	proxy.ServeHTTP(w, r)
 }

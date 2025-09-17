@@ -32,7 +32,49 @@
                    [matChipInputFor]="templateChipGrid"
                    (matChipInputTokenEnd)="addTag($event)"
             />
+            <mat-hint *ngIf="templateKeywords().length === 0" class="warning-hint">
+        At least one tag is required
+    </mat-hint>
         </mat-form-field>
+
+        <!-- Tour Length and Duration Section -->
+<div class="tour-metrics" *ngIf="keypoints.length >= 2">
+    <h3>Tour Metrics</h3>
+    <div class="metrics-grid">
+        <mat-card class="metric-card">
+            <mat-card-content>
+                <mat-icon>straighten</mat-icon>
+                <h4>Distance</h4>
+                <p>{{ tourLength | number:'1.2-2' }} km</p>
+            </mat-card-content>
+        </mat-card>
+        
+        <mat-card class="metric-card">
+            <mat-card-content>
+                <mat-icon>directions_walk</mat-icon>
+                <h4>Walking</h4>
+                <p>{{ walkingTime }} min</p>
+            </mat-card-content>
+        </mat-card>
+        
+        <mat-card class="metric-card">
+            <mat-card-content>
+                <mat-icon>directions_bike</mat-icon>
+                <h4>Cycling</h4>
+                <p>{{ bicycleTime }} min</p>
+            </mat-card-content>
+        </mat-card>
+        
+        <mat-card class="metric-card">
+            <mat-card-content>
+                <mat-icon>directions_car</mat-icon>
+                <h4>Driving</h4>
+                <p>{{ carTime }} min</p>
+            </mat-card-content>
+        </mat-card>
+    </div>
+</div>
+
         <!-- Keypoints Section -->
         <div class="keypoints-section">
             <div class="keypoints-header">
@@ -42,7 +84,12 @@
                     Add Keypoint
                 </button>
             </div>
-            
+            <div class="requirement-message" *ngIf="keypoints.length < 2">
+                <mat-icon color="warn">info</mat-icon>
+                <p>{{ keypointRequirementMessage }}</p>
+            </div>
+
+
             <!-- Preview existing keypoints -->
             <div class="keypoints-preview" *ngIf="keypoints.length > 0">
                 <mat-card *ngFor="let keypoint of keypoints; let i = index" class="keypoint-card">
@@ -67,6 +114,28 @@
                 <p>No keypoints added yet. Click "Add Keypoint" to start building your tour route.</p>
             </div>
         </div>
-    <button class="add-update" color="primary" type="submit" mat-raised-button>Create Tour</button>
+ <button 
+            class="add-update" 
+            color="primary" 
+            type="submit" 
+            mat-raised-button
+            [disabled]="!canCreateTour"
+            [class.disabled]="!canCreateTour">
+            <mat-icon *ngIf="keypoints.length < 2">block</mat-icon>
+            <mat-icon *ngIf="keypoints.length >= 2">check</mat-icon>
+            Create Tour
+        </button>  
+     <div class="create-status" *ngIf="!canCreateTour">
+            <p *ngIf="!tourCreationForm.valid" class="error-text">
+                Please fill all required fields
+            </p>
+            <p *ngIf="tourCreationForm.valid && keypoints.length < 2" class="warning-text">
+                {{ keypointRequirementMessage }}
+            </p>
+               <p *ngIf="tourCreationForm.valid && keypoints.length >= 2 && templateKeywords().length < 1" class="warning-text">
+        {{ tagRequirementMessage }}
+    </p>
+        </div>
+        
     </div>
 </form>

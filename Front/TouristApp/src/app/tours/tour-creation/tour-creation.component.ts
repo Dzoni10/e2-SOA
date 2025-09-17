@@ -18,7 +18,10 @@ import { forkJoin, map, of, switchMap, throwError } from 'rxjs';
 })
 export class TourCreationComponent implements OnInit {
   keypoints: Keypoint[] = [];
-
+  tourLength: number = 0;
+  walkingTime: number = 0;
+  bicycleTime: number = 0;
+  carTime: number = 0;
   tourCreationForm!: FormGroup;
   tagList: string[] = []//["Hiking", "Walk", "Run", "Summer", "Spring", "Fall", "Winter", "See", "Mountain", "City", "Village"]
   readonly templateKeywords = signal(this.tagList);
@@ -125,6 +128,8 @@ export class TourCreationComponent implements OnInit {
     };
 
     this.keypoints.push(keypoint);
+    this.updateTourMetrics();
+
   }
 
   removeKeypoint(index: number) {
@@ -137,6 +142,8 @@ export class TourCreationComponent implements OnInit {
     });
 
     this.keypoints.splice(index, 1);
+    this.updateTourMetrics();
+
   }
 
    // Main method for creating tours with keypoints
@@ -173,7 +180,7 @@ export class TourCreationComponent implements OnInit {
         const files = kp.formData.getAll('images') as File[];
         files.forEach(file => payload.append('images', file));
       }
-
+        
       return this.tourService.createKeypoint(payload).toPromise();
     });
 
@@ -226,4 +233,48 @@ export class TourCreationComponent implements OnInit {
     }
   }
 
+ private async updateTourMetrics() {
+  if (this.keypoints.length >= 2) {
+    try {
+      // Pošalji keypoints na backend za računanje
+      const metrics = await this.tourService.calculateTourMetrics(this.keypoints).toPromise();
+      if (metrics) {
+        this.tourLength = metrics.tourLength;
+        this.walkingTime = metrics.walkingTime;
+        this.bicycleTime = metrics.bicycleTime;
+        this.carTime = metrics.carTime;
+      }
+    } catch (error) {
+      console.error('Failed to calculate metrics:', error);
+      // Fallback na lokalno računanje ako backend ne radi
+     alert("Failed to calculate metrics from server. ");
+      // this.calculateLocally();
+    }
+  } else {
+    // Resetuj metrics
+    this.tourLength = 0;
+    this.walkingTime = 0;
+    this.bicycleTime = 0;  
+    this.carTime = 0;
+  }
+}
+
+  get canCreateTour(): boolean {
+    return this.tourCreationForm.valid && this.keypoints.length >= 2 &&  this.templateKeywords().length >= 1;
+  }
+
+  get keypointRequirementMessage(): string {
+    if (this.keypoints.length === 0) {
+      return "Add at least 2 keypoints to create a tour";
+    } else if (this.keypoints.length === 1) {
+      return "Add 1 more keypoint to enable tour creation";
+    }
+    return "";
+  }
+  get tagRequirementMessage(): string {
+  if (this.templateKeywords().length === 0) {
+    return "Add at least 1 tag to create a tour";
+  }
+  return "";
+}
 }

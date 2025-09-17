@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Tour } from '../model/tour.model';
+import { Tour, TourStatus } from '../model/tour.model';
 import { ToursService } from '../tours.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -14,6 +14,7 @@ export class ToursListComponent implements OnInit {
 
 
   tours: Tour[]=[];
+  toursWithKeypoints: { tour: Tour, firstKeypoint?: any }[] = [];
 
   loading=true;
   isAllTours = false;
@@ -53,18 +54,39 @@ export class ToursListComponent implements OnInit {
     });
   }
 
-  loadAllTours(): void {
-    this.tourService.getAllTours().subscribe({
-      next: (data) => {
-        this.tours = data;
+loadAllTours(): void {
+  this.tourService.getAllTours().subscribe({
+    next: (data) => {
+      // Filtriraj samo published ture
+      const publishedTours = data.filter(tour => tour.status === "Published");
+      
+      // Učitaj prvi keypoint za svaku turu
+      const tourRequests = publishedTours.map(tour => 
+        this.tourService.getKeyPointsForTour(tour.id!).toPromise()
+          .then(keypoints => ({
+            tour: tour,
+            firstKeypoint: keypoints && keypoints.length > 0 ? keypoints[0] : null
+          }))
+          .catch(() => ({
+            tour: tour,
+            firstKeypoint: null
+          }))
+      );
+
+      Promise.all(tourRequests).then(results => {
+        this.toursWithKeypoints = results;
+        this.tours = publishedTours;
         this.loading = false;
-      },
-      error: (err) => {
-        console.error('Error loading all tours', err);
-        this.loading = false;
-      }
-    });
-  }
+      });
+    },
+    error: (err) => {
+      console.error('Error loading all tours', err);
+      this.loading = false;
+    }
+  });
+}
+
+
   addReview(tourId: string | undefined): void {
     if (!tourId) {
       console.error("Tour ID is missing");

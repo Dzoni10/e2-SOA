@@ -43,7 +43,7 @@ func main() {
 	r.HandleFunc("/reviews/{id}/add-image", reviewHandler.AddImageToReview).Methods("POST")
 	r.HandleFunc("/reviews/{id}/remove-image", reviewHandler.RemoveImageFromReview).Methods("DELETE")
 	r.HandleFunc("/uploads/reviews/{filename}", reviewHandler.ServeImage).Methods("GET")
-
+	r.HandleFunc("/tours/calculate-metrics", h.CalculateMetrics).Methods("POST")
 	r.HandleFunc("/tours/keypoints", keypointHandler.CreateKeyPoint).Methods("POST")                               // Changed from /tours/keypoints
 	r.HandleFunc("/tours/keypoints/bulk-update-tour-id", keypointHandler.BulkUpdateKeyPointsTourId).Methods("PUT") // Added missing route
 	r.HandleFunc("/keypoints/{id}/update-tour-id", keypointHandler.UpdateKeyPointTourId).Methods("PUT")            // Optional individual update
@@ -60,6 +60,10 @@ func main() {
 	r.HandleFunc("/position/{id}/create", positionHandler.InitializePosition).Methods("POST")
 	r.HandleFunc("/position/{id}/update", positionHandler.UpdatePosition).Methods("PUT")
 
+	r.HandleFunc("/tours/{id}/status", h.UpdateStatus).Methods("PUT")
+	r.HandleFunc("/tours/{id}/status-info", h.GetTourStatusInfo).Methods("GET")
+
+	r.HandleFunc("/tours/{id}/cost", h.UpdateCost).Methods("PUT")
 	/*corsHandler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:4200"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "UPDATE", "DELETE", "OPTIONS"},

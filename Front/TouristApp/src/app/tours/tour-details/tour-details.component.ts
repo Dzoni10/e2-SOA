@@ -2,11 +2,13 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import * as L from 'leaflet';
 import 'leaflet-routing-machine'; // for road routing
-import { Tour } from '../model/tour.model';
+import { Tour, TourStatus, TourStatusInfo } from '../model/tour.model';
 import { Keypoint } from '../model/keypoint.model';
 import { ToursService } from '../tours.service';
 import { forkJoin, Observable } from 'rxjs';
-
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { AuthService } from 'src/app/auth/auth.service';
+import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-tour-details',
   templateUrl: './tour-details.component.html',
@@ -19,32 +21,151 @@ export class TourDetailsComponent implements OnInit {
   @ViewChild('mapContainer') mapContainer!: ElementRef;
   routeControl!: any;
   keypointLayer!: L.LayerGroup
-
+statusInfo!: TourStatusInfo;
+canEditStatus = false;
+currentUser: any;
+TourStatus = TourStatus;
   constructor(
-    private route: ActivatedRoute,
-    private tourService: ToursService
+    private route: ActivatedRoute, private tourService: ToursService, private snackBar: MatSnackBar,private authService: AuthService
   ) {}
 
   ngOnInit(): void {
+  const user = this.authService.getCurrentUser();
+  this.currentUser = user;
+
+  if (!user || !user.userId) {
+    this.snackBar.open("You must be logged in to see tours", "Close", {
+      duration: 3000, 
+      horizontalPosition: "center"
+    });
+    return;
+  }
+
+
     const tourId = this.route.snapshot.paramMap.get('id');
     if (tourId) this.loadTour(tourId);
   }
 
-  async loadTour(tourId: string) {
-    try {
-      const tourResponse = await this.tourService.getTourByID(tourId).toPromise();
-      if(tourResponse){
-        this.tour = tourResponse;
-      }
-      const keypointsResponse = await this.tourService.getKeyPointsForTour(tourId).toPromise();
-      if(keypointsResponse){
-        this.keypoints = keypointsResponse;
-      }
-      this.initMap();
-    } catch (error) {
-      console.error('Failed to load tour:', error);
+async loadTour(tourId: string) {
+  try {
+    const tourResponse = await this.tourService.getTourByID(tourId).toPromise();
+    if (tourResponse) {
+      this.tour = tourResponse;
     }
+    
+    const keypointsResponse = await this.tourService.getKeyPointsForTour(tourId).toPromise();
+    if (keypointsResponse) {
+      this.keypoints = keypointsResponse;
+    }
+
+    const statusResponse = await this.tourService.getTourStatusInfo(tourId, this.currentUser.userId).toPromise();
+    if (statusResponse) {
+      this.statusInfo = statusResponse;
+      this.canEditStatus = statusResponse.canEdit;
+    }
+
+    this.initMap();
+    
+  } catch (error) {
+    this.showMessage('Failed to load tour details');
   }
+}
+
+
+publishTour(): void {
+  if (!this.canEditStatus) {
+    this.showMessage('You are not authorized to change this tour status');
+    return;
+  }
+
+  this.tourService.publishTour(this.tour.id!,this.currentUser.userId).subscribe({
+    next: () => {
+      this.tour.status = TourStatus.Published;
+      this.showMessage('Tour published successfully');
+      this.refreshStatusInfo();
+    },
+    error: (error) => {
+      console.error('Failed to publish tour:', error);
+      this.showMessage('Failed to publish tour: ' + (error.error?.error || 'Unknown error'));
+    }
+  });
+}
+
+archiveTour(): void {
+  if (!this.canEditStatus) {
+    this.showMessage('You are not authorized to change this tour status');
+    return;
+  }
+
+  this.tourService.archiveTour(this.tour.id!, this.currentUser.userId).subscribe({
+    next: () => {
+      this.tour.status = TourStatus.Archived;
+      this.showMessage('Tour archived successfully');
+      this.refreshStatusInfo();
+    },
+    error: (error) => {
+      console.error('Failed to archive tour:', error);
+      this.showMessage('Failed to archive tour: ' + (error.error?.error || 'Unknown error'));
+    }
+  });
+}
+
+reactivateTour(): void {
+  if (!this.canEditStatus) {
+    this.showMessage('You are not authorized to change this tour status');
+    return;
+  }
+
+  this.tourService.reactivateTour(this.tour.id!, this.currentUser.userId).subscribe({
+    next: () => {
+      this.tour.status = TourStatus.Published;
+      this.showMessage('Tour reactivated successfully');
+      this.refreshStatusInfo();
+    },
+    error: (error) => {
+      console.error('Failed to reactivate tour:', error);
+      this.showMessage('Failed to reactivate tour: ' + (error.error?.error || 'Unknown error'));
+    }
+  });
+}
+
+private refreshStatusInfo(): void {
+  if (this.tour.id) {
+    this.tourService.getTourStatusInfo(this.tour.id, this.currentUser.userId).subscribe({
+      next: (statusInfo) => {
+        this.statusInfo = statusInfo;
+      },
+      error: (error) => {
+        console.error('Failed to refresh status info:', error);
+      }
+    });
+  }
+}
+
+private showMessage(message: string): void {
+  this.snackBar.open(message, 'Close', {
+    duration: 3000,
+    horizontalPosition: 'center',
+    verticalPosition: 'bottom'
+  });
+}
+
+getStatusDisplayName(): string {
+  if (this.statusInfo?.currentStatus) return this.statusInfo.currentStatus;
+  return 'Unknown';
+}
+
+canPublish(): boolean {
+  return this.canEditStatus && (this.statusInfo?.currentStatus === 'Draft');
+}
+
+canArchive(): boolean {
+  return this.canEditStatus && (this.statusInfo?.currentStatus === 'Published');
+}
+
+canReactivate(): boolean {
+  return this.canEditStatus && (this.statusInfo?.currentStatus === 'Archived');
+}
 
   initMap() {
     if (!this.mapContainer) return;
@@ -89,7 +210,7 @@ export class TourDetailsComponent implements OnInit {
         <input id="kp-name-${kp.id}" type="text" value="${kp.name}" style="width:100%"/><br>
         
         <label>Description:</label><br>
-        <textarea id="kp-desc-${kp.id}" style="width:100%">${kp.description || ''}</textarea><br>
+        <textarea id="kp-desc-${kp.id}" style="width:100%">${kp.description}</textarea><br>
         
         <label>Image:</label><br>
         <input id="kp-img-${kp.id}" type="file" accept="image/*" /><br><br>
@@ -285,6 +406,20 @@ createKeypoint(lat: number, lng: number) {
       });
     },
     error: (err) => console.error("Keypoint save failed", err)
+  });
+}
+
+updateTourCost(): void {
+  if (!this.tour || !this.canEditStatus) return;
+
+  this.tourService.updateTourCost(this.tour.id!, this.tour.cost).subscribe({
+    next: () => {
+      this.showMessage('Tour cost updated successfully');
+    },
+    error: (error) => {
+      console.error('Failed to update cost:', error);
+      this.showMessage('Failed to update cost');
+    }
   });
 }
 
