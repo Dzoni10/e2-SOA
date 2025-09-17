@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"fmt"
 	"time"
 	"tours/database"
 	"tours/model"
@@ -18,13 +19,14 @@ func (r *TourRepository) FindAll() ([]model.Tour, error) {
 
 	cursor, err := database.TourCollection.Find(ctx, bson.D{})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to query tour: %w", err)
 	}
 	defer cursor.Close(ctx)
 
 	var tours []model.Tour
 	if err = cursor.All(ctx, &tours); err != nil {
-		return nil, err
+		fmt.Println("Error decoding tours:", err)
+		return nil, fmt.Errorf("failed to decode tours: %w", err)
 	}
 	return tours, nil
 }

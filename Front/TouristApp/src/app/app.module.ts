@@ -18,6 +18,7 @@ import { FollowersModule } from './followers/followers.module';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './auth/interceptor-jwt/auth.interceptor';
 import {  MatDialogModule } from '@angular/material/dialog';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @NgModule({
   declarations: [
@@ -37,7 +38,8 @@ import {  MatDialogModule } from '@angular/material/dialog';
     MatDialogModule,
     ToursModule,
     BlogsModule,
-    FollowersModule
+    FollowersModule,
+    MatProgressBarModule
 
   ],
   providers: [

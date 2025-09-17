@@ -16,24 +16,25 @@ var TourCollection *mongo.Collection
 var ReviewCollection *mongo.Collection
 var KeyPointCollection *mongo.Collection
 var PositionCollection *mongo.Collection
+var TourExecutionCollection *mongo.Collection
 
 func Init() {
 	uri := os.Getenv("MONGO_URI")
 
-	// if uri == "" {
-	// 	uri = "mongodb://localhost:27017"
-	// }
+	if uri == "" {
+		uri = "mongodb://localhost:27017"
+	}
 
 	dbName := os.Getenv("MONGO_DB")
 
-	// if dbName == "" {
-	// 	dbName = "Tours"
-	// }
+	if dbName == "" {
+		dbName = "Tours"
+	}
 
 	collName := os.Getenv("MONGO_COLLECTION")
-	// if collName == "" {
-	// 	collName = "Tours"
-	// }
+	if collName == "" {
+		collName = "Tours"
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -55,4 +56,6 @@ func Init() {
 	ReviewCollection = client.Database(dbName).Collection("Reviews")
 	KeyPointCollection = client.Database(dbName).Collection("Keypoints")
 	PositionCollection = client.Database(dbName).Collection("Positions")
+	TourExecutionCollection = client.Database(dbName).Collection("TourExecutions")
+
 }
