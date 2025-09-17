@@ -1,119 +1,114 @@
 <div class="container" *ngIf="!loading; else loader">
   <mat-grid-list cols="4" rowHeight="1:1" gutterSize="20" class="grid">
-    <!-- Prikaz za sve ture (published sa keypoints) -->
-    <ng-container *ngIf="isAllTours; else myTours">
-      <ng-container *ngIf="toursWithKeypoints?.length > 0; else noTours">
-        <mat-grid-tile *ngFor="let item of toursWithKeypoints">
-          <button mat-card class="tour-card" (click)="tourDetails(item.tour.id)">
-            <mat-card-header>
-              <mat-card-title>{{ item.tour.name }}</mat-card-title>
-              <mat-card-subtitle>#{{ item.tour.tags }}</mat-card-subtitle>
-            </mat-card-header>
-
-            <mat-card-content>
-              <p><strong>Difficulty:</strong> {{ item.tour.difficulty }}</p>
-              <p><strong>Description:</strong> {{ item.tour.description }}</p>
-              <p><strong>Cost:</strong> {{ item.tour.cost }}</p>
-              <p><strong>Length:</strong> {{ item.tour.tourLength | number:'1.2-2' }} km</p>
-
-              <!-- Transport times u jednom redu -->
-              <div class="transport-times" *ngIf="item.tour.walkingTime || item.tour.bicycleTime || item.tour.carTime">
-                <span class="transport-item">
-                  <mat-icon>directions_walk</mat-icon>
-                  {{ item.tour.walkingTime || 0 }}min
-                </span>
-                <span class="transport-item">
-                  <mat-icon>directions_bike</mat-icon>
-                  {{ item.tour.bicycleTime || 0 }}min
-                </span>
-                <span class="transport-item">
-                  <mat-icon>directions_car</mat-icon>
-                  {{ item.tour.carTime || 0 }}min
-                </span>
-              </div>
-
-              <!-- Prvi keypoint -->
-              <div class="keypoint-info">
-                <h3>Key points 1:</h3>
-                <p *ngIf="item.firstKeypoint">
-                  <strong>Name:</strong> {{ item.firstKeypoint.name }}
-                </p>
-                <p *ngIf="item.firstKeypoint">
-                  <strong>Description:</strong> {{ item.firstKeypoint.description }}
-                </p>
-                <p *ngIf="!item.firstKeypoint"><strong>Starts at:</strong> No keypoints</p>
-              </div>
-            </mat-card-content>
-
-            <mat-card-actions>
-              <button mat-raised-button color="primary" (click)="seeReview(item.tour.id); $event.stopPropagation()">
-                See Reviews
-              </button>
-
-              <button mat-raised-button color="primary" (click)="addReview(item.tour.id); $event.stopPropagation()">
-                Add Review
-              </button>
-
-              <button mat-raised-button color="primary" (click)="startTour(item.tour); $event.stopPropagation()">
-                Start Tour
-              </button>
-            </mat-card-actions>
+    
+    <!-- Za sve ture (published sa keypoints) -->
+     <div *ngIf="isAllTours">
+       <mat-grid-tile *ngFor="let item of toursWithKeypoints">
+         <button mat-card class="tour-card" >
+        <mat-card-header>
+          <mat-card-title>{{ item.tour.name }}</mat-card-title>
+          <mat-card-subtitle>#{{ item.tour.tags }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p><strong>Difficulty:</strong> {{ item.tour.difficulty }}</p>
+          <p><strong>Description:</strong> {{ item.tour.description }}</p>
+          <p><strong>Cost:</strong> {{ item.tour.cost }}</p>
+          <p><strong>Length:</strong> {{ item.tour.tourLength | number:'1.2-2' }} km</p>
+          
+          <!-- Transport times u jednom redu -->
+          <div class="transport-times">
+            <span class="transport-item">
+              <mat-icon>directions_walk</mat-icon>
+              {{ item.tour.walkingTime || 0 }}min
+            </span>
+            <span class="transport-item">
+              <mat-icon>directions_bike</mat-icon>
+              {{ item.tour.bicycleTime || 0 }}min
+            </span>
+            <span class="transport-item">
+              <mat-icon>directions_car</mat-icon>
+              {{ item.tour.carTime || 0 }}min
+            </span>
+          </div>
+          
+          <!-- Prvi keypoint -->
+          <div class="keypoint-info">
+            <h3>Key points 1:</h3>
+            <p *ngIf="item.firstKeypoint">
+              <strong>Name:</strong> {{ item.firstKeypoint.name }}
+            </p>
+            <p>
+              <strong>Description:</strong> {{ item.firstKeypoint.description }}
+            </p>
+            <p *ngIf="!item.firstKeypoint"><strong>Starts at:</strong> No keypoints</p>
+          </div>
+        </mat-card-content>
+        
+        <mat-card-actions>
+          <button mat-raised-button color="primary" (click)="seeReview(item.tour.id)">
+            See Reviews
           </button>
-        </mat-grid-tile>
-      </ng-container>
-    </ng-container>
-
-    <!-- Prikaz za moje ture (sa statusom) -->
-    <ng-template #myTours>
-      <ng-container *ngIf="tours?.length > 0; else noTours">
-        <mat-grid-tile *ngFor="let tour of tours">
-          <button mat-card class="tour-card" (click)="tourDetails(tour.id)">
-            <mat-card-header>
-              <mat-card-title>{{ tour.name }}</mat-card-title>
-              <mat-card-subtitle>#{{ tour.tags }}</mat-card-subtitle>
-            </mat-card-header>
-
-            <mat-card-content>
-              <p><strong>Difficulty:</strong> {{ tour.difficulty }}</p>
-              <p><strong>Description:</strong> {{ tour.description }}</p>
-              <p><strong>Status:</strong> {{ tour.status }}</p>
-              <p><strong>Cost:</strong> {{ tour.cost }}</p>
-              <p><strong>Length:</strong> {{ tour.tourLength | number:'1.2-2' }} km</p>
-
-              <!-- Transport times za moje ture -->
-              <div class="transport-times" *ngIf="tour.walkingTime || tour.bicycleTime || tour.carTime">
-                <span class="transport-item">
-                  <mat-icon>directions_walk</mat-icon>
-                  {{ tour.walkingTime || 0 }}min
-                </span>
-                <span class="transport-item">
-                  <mat-icon>directions_bike</mat-icon>
-                  {{ tour.bicycleTime || 0 }}min
-                </span>
-                <span class="transport-item">
-                  <mat-icon>directions_car</mat-icon>
-                  {{ tour.carTime || 0 }}min
-                </span>
-              </div>
-            </mat-card-content>
-
-            <mat-card-actions>
-              <button mat-raised-button color="primary" (click)="seeReview(tour.id); $event.stopPropagation()">
-                See Reviews
-              </button>
-
-              <button mat-raised-button color="primary" *ngIf="isAllTours" (click)="addReview(tour.id); $event.stopPropagation()">
-                Add Review
-              </button>
-
-              <button mat-raised-button color="primary" *ngIf="isAllTours" (click)="startTour(tour); $event.stopPropagation()">
-                Start Tour
-              </button>
-            </mat-card-actions>
+        </mat-card-actions>
+        <mat-card-actions>
+          <button mat-raised-button color="primary" (click)="addReview(item.tour.id)">
+            Add Review
           </button>
-        </mat-grid-tile>
-      </ng-container>
-    </ng-template>
+        </mat-card-actions>
+      </button>
+    </mat-grid-tile>
+  </div>
+    
+    <!-- Za moje ture (sa statusom) -->
+  <div *ngIf="!isAllTours">
+    <mat-grid-tile *ngFor="let tour of tours">
+      <mat-card class="tour-card" (click)="tourDetails(tour.id)">
+        <mat-card-header>
+          <mat-card-title>{{ tour.name }}</mat-card-title>
+          <mat-card-subtitle>#{{ tour.tags }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p><strong>Difficulty:</strong> {{ tour.difficulty }}</p>
+          <p><strong>Description:</strong> {{ tour.description }}</p>
+          <p><strong>Status:</strong> {{ tour.status }}</p>
+          <p><strong>Cost:</strong> {{ tour.cost }}</p>
+          <p><strong>Length:</strong> {{ tour.tourLength | number:'1.2-2' }} km</p>
+          
+          <!-- Transport times za moje ture -->
+          <div class="transport-times" *ngIf="tour.walkingTime || tour.bicycleTime || tour.carTime">
+            <span class="transport-item">
+              <mat-icon>directions_walk</mat-icon>
+              {{ tour.walkingTime || 0 }}min
+            </span>
+            <span class="transport-item">
+              <mat-icon>directions_bike</mat-icon>
+              {{ tour.bicycleTime || 0 }}min
+            </span>
+            <span class="transport-item">
+              <mat-icon>directions_car</mat-icon>
+              {{ tour.carTime || 0 }}min
+            </span>
+          </div>
+        </mat-card-content>
+        
+        <mat-card-actions>
+          <button mat-raised-button color="primary" (click)="seeReview(tour.id)">
+            See Reviews
+          </button>
+        </mat-card-actions>
+
+        <mat-card-actions *ngIf="isAllTours">
+          <button mat-raised-button color="primary" (click)="addReview(tour.id)">
+            Add Review
+          </button>
+        </mat-card-actions>
+        <mat-card-actions *ngIf="isAllTours">
+          <button mat-raised-button color="primary" (click)="startTour(tour)">
+            Start Tour
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </mat-grid-tile>
+    </div>
   </mat-grid-list>
 </div>
 

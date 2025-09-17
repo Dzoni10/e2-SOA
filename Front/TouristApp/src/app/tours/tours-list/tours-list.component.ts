@@ -105,8 +105,8 @@ loadAllTours(): void {
   tourDetails(tourId: string | undefined) {
     this.router.navigate(['/tours', tourId]);
   }
-
-  startTour(tour: Tour): void {
+  
+    startTour(tour: Tour): void {
   // Ovde pozoveš startTour i otvoriš novu rutu
   this.tourService.startTour(tour.id!, 123, 44.8176, 20.4569).subscribe({
     next: (execution) => {
@@ -115,5 +115,4 @@ loadAllTours(): void {
     error: (err) => console.error(err)
   });
 }
-  
 }
