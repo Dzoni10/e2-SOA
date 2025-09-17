@@ -31,6 +31,10 @@ func main() {
 	positionSrv := &service.PositionService{Repo: positionRepo}
 	positionHandler := &handler.PositionHandler{Service: positionSrv}
 
+	executionRepo := &repo.TourExecutionRepository{}
+	executionSrv := &service.TourExecutionService{Repo: executionRepo}
+	executionHandler := &handler.TourExecutionHandler{Service: executionSrv}
+
 	r := mux.NewRouter()
 
 	r.HandleFunc("/tours/all", h.GetAllTours).Methods("GET")
@@ -59,6 +63,15 @@ func main() {
 	r.HandleFunc("/position/{id}", positionHandler.GetPosition).Methods("GET")
 	r.HandleFunc("/position/{id}/create", positionHandler.InitializePosition).Methods("POST")
 	r.HandleFunc("/position/{id}/update", positionHandler.UpdatePosition).Methods("PUT")
+
+	//tour execution
+
+	r.HandleFunc("/tour-executions/start", executionHandler.StartTour).Methods("POST")
+	r.HandleFunc("/tour-executions/{id}/finish", executionHandler.FinishTour).Methods("PUT")
+	r.HandleFunc("/tour-executions/{id}/abandon", executionHandler.AbandonTour).Methods("PUT")
+	r.HandleFunc("/tour-executions/{id}/update-location", executionHandler.UpdateLocation).Methods("PUT")
+	r.HandleFunc("/tour-executions/{id}/add-keypoint", executionHandler.AddCompletedKeyPoint).Methods("PUT")
+	r.HandleFunc("/tour-executions/{id}", executionHandler.GetExecutionById).Methods("GET")
 
 	/*corsHandler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:4200"},

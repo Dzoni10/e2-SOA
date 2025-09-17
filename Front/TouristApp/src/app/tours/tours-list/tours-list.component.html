@@ -3,7 +3,7 @@
                  class="grid"
                  *ngIf="tours.length > 0; else noTours">
     <mat-grid-tile *ngFor="let tour of tours">
-      <button mat-card class="tour-card" (click)="tourDetails(tour.id)">
+      <mat-card class="tour-card" (click)="tourDetails(tour.id)">
         <mat-card-header>
           <mat-card-title>{{ tour.name }}</mat-card-title>
           <mat-card-subtitle>#{{ tour.tags }}</mat-card-subtitle>
@@ -13,7 +13,7 @@
           <p><strong>Description:</strong> {{tour.description}}</p>
           <p><strong>Status:</strong> {{tour.status}}</p>
           <p><strong>Cost:</strong> {{tour.cost}}</p>
-          <p><strong>Length(in km):</strong> {{tour.tourLength}}</p>
+          <p><strong>Length(in km):</strong> {{tour.tourLength | number:'1.2-2'}}</p>
         </mat-card-content>
         <mat-card-actions>
           <button mat-raised-button color="primary" (click)="seeReview(tour.id)">
@@ -25,7 +25,12 @@
             Add Review
           </button>
         </mat-card-actions>
-      </button>
+        <mat-card-actions *ngIf="isAllTours">
+          <button mat-raised-button color="primary" (click)="startTour(tour)">
+            Start Tour
+          </button>
+        </mat-card-actions>
+      </mat-card>
     </mat-grid-tile>
   </mat-grid-list>
 </div>

@@ -19,6 +19,8 @@ import { AddKeypointComponent } from './add-keypoint/add-keypoint.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { TourDetailsComponent } from './tour-details/tour-details.component';
 import { PositionComponent } from './position/position.component';
+import { TourExecutionComponent } from './tour-execution/tour-execution.component';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 
 
@@ -30,7 +32,8 @@ import { PositionComponent } from './position/position.component';
     TourReviewComponent,
     AddKeypointComponent,
     TourDetailsComponent,
-    PositionComponent
+    PositionComponent,
+    TourExecutionComponent
   ],
   imports: [
     CommonModule,
@@ -45,7 +48,8 @@ import { PositionComponent } from './position/position.component';
     MatCardModule,
     MatGridListModule,
     FormsModule,
-    MatDialogModule
+    MatDialogModule,
+    MatProgressBarModule
   ]
 })
 export class ToursModule { }

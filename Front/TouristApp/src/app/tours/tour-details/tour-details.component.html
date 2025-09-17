@@ -1,4 +1,4 @@
-<div class="tour-info">
+<div *ngIf="tour" class="tour-info">
   <h2>{{ tour.name }}</h2>
   <p>{{ tour.description }}</p>
   <p><strong>Difficulty:</strong> {{ tour.difficulty }}</p>
