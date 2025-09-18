@@ -5,6 +5,8 @@ import { Review } from './model/review.model'
 import { Observable } from 'rxjs';
 import { Keypoint } from './model/keypoint.model';
 import { Position } from './model/position.model';
+import {  HttpParams } from '@angular/common/http';
+import { TourStatusInfo, StatusChangeRequest } from './model/tour.model';
 import { TourExecution } from './model/tour-execution';
 
 @Injectable({
@@ -106,9 +108,24 @@ getKeypointsByTourId(tourId: string): Observable<Keypoint[]> {
     return this.http.put<{ message: string, updatedCount: number }>(`${this.apiUrl}/keypoints/bulk-update-tour-id`, bulkUpdateData);
   }
 
-  updateTourLength(tourId: string): Observable<{status: string}> {
-    return this.http.put<{status: string}>(`${this.apiUrl}/${tourId}/update-length`, {});
-  }
+ updateTourLength(tourId: string): Observable<{ status: string,tourLength: number,walkingTime: number,bicycleTime: number,carTime: number}> 
+{
+  return this.http.put<{status: string,tourLength: number,walkingTime: number,bicycleTime: number, carTime: number}>(`${this.apiUrl}/${tourId}/update-length`, {});
+}
+
+calculateTourMetrics(keypoints: Keypoint[]): Observable<{
+  tourLength: number,
+  walkingTime: number,
+  bicycleTime: number,
+  carTime: number
+}> {
+  return this.http.post<{
+    tourLength: number,
+    walkingTime: number,
+    bicycleTime: number,
+    carTime: number
+  }>(`${this.apiUrl}/calculate-metrics`, keypoints);
+}
 
   getPosition(userId: number): Observable<Position>{
     return this.http.get<Position>(`${this.api}/position/${userId}`);
@@ -122,6 +139,30 @@ getKeypointsByTourId(tourId: string): Observable<Keypoint[]> {
     return this.http.put<Position>(`${this.api}/position/${userId}/update`, position);
   }
 
+  getTourStatusInfo(tourId: string, creatorId: number): Observable<TourStatusInfo> {
+  const params = new HttpParams().set('creatorId', creatorId.toString());
+  return this.http.get<TourStatusInfo>(`${this.apiUrl}/${tourId}/status-info`, { params });
+}
+
+updateTourStatus(tourId: string, statusRequest: StatusChangeRequest): Observable<any> {
+  return this.http.put<any>(`${this.apiUrl}/${tourId}/status`, statusRequest);
+}
+
+publishTour(tourId: string, creatorId: number): Observable<any> {
+  return this.updateTourStatus(tourId, { status: 1, creatorId });
+}
+
+archiveTour(tourId: string, creatorId: number): Observable<any> {
+  return this.updateTourStatus(tourId, { status: 2, creatorId });
+}
+
+reactivateTour(tourId: string, creatorId: number): Observable<any> {
+  return this.updateTourStatus(tourId, { status: 1, creatorId });
+}
+
+updateTourCost(tourId: string, cost: number): Observable<any> {
+  return this.http.put<any>(`${this.apiUrl}/${tourId}/cost`, { cost });
+}
 
   //tour Execution
 

@@ -42,12 +42,15 @@ func (h *GatewayHandler) HandleFollowers(w http.ResponseWriter, r *http.Request)
 	proxyRequest(w, r, "/followers", "http://localhost:8083")
 }
 func (h *GatewayHandler) HandleTours(w http.ResponseWriter, r *http.Request) {
+
 	proxyRequest(w, r, "/position", "http://localhost:8081")
 	// proxy := httputil.NewSingleHostReverseProxy(&url.URL{
 	// 	Scheme: "http",
 	// 	Host:   "localhost:8081",
 	// })
 	// proxy.ServeHTTP(w, r)
+
+	//!!!!!  OVO IZNAD JE JEDAN NACIN A OVO ISPOD ZAKOMENTARISANO JE DRUGI NACIN  VALJDA ?????
 }
 func (h *GatewayHandler) HandlePosition(w http.ResponseWriter, r *http.Request) {
 	proxyRequest(w, r, "/position", "http://localhost:8081")
@@ -62,7 +65,7 @@ func (h *GatewayHandler) HandleReviews(w http.ResponseWriter, r *http.Request) {
 func (h *GatewayHandler) HandleKeypoints(w http.ResponseWriter, r *http.Request) {
 	proxy := httputil.NewSingleHostReverseProxy(&url.URL{
 		Scheme: "http",
-		Host:   "localhost:8080",
+		Host:   "localhost:8081", // 	Host:   "localhost:8080",   NEKO JE OVO STAVIO AKO NE RADI PROVERI OVO
 	})
 	proxy.ServeHTTP(w, r)
 }

@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
+	"time"
 	"tours/model"
 	"tours/service"
 
@@ -16,6 +18,93 @@ import (
 
 type TourHandler struct {
 	Service *service.TourService
+}
+
+type StatusChangeRequest struct {
+	Status    model.Status `json:"status"`
+	CreatorID int          `json:"creatorId"`
+}
+
+func (h *TourHandler) UpdateStatus(w http.ResponseWriter, r *http.Request) {
+	tourIDHex := mux.Vars(r)["id"]
+	tourID, err := primitive.ObjectIDFromHex(tourIDHex)
+	if err != nil {
+		http.Error(w, "Invalid tour ID format", http.StatusBadRequest)
+		return
+	}
+
+	var request StatusChangeRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	existingTour, err := h.Service.GetTour(tourID)
+	if err != nil {
+		http.Error(w, "Tour not found", http.StatusNotFound)
+		return
+	}
+
+	if existingTour.CreatorID != request.CreatorID {
+		http.Error(w, "Only tour author can change status", http.StatusForbidden)
+		return
+	}
+
+	if request.Status == model.Published {
+		if existingTour.Name == "" || existingTour.Description == "" {
+			http.Error(w, "Tour must have name and description", http.StatusBadRequest)
+			return
+		}
+
+		keypoints, err := h.Service.KeyPointRepo.FindByTourID(tourID)
+		if err != nil || len(keypoints) < 2 {
+			http.Error(w, "Tour must have at least 2 keypoints to be published", http.StatusBadRequest)
+			return
+		}
+	}
+
+	if err := h.Service.UpdateTourStatus(tourID, request.Status); err != nil {
+		log.Println("Update status failed:", err)
+		http.Error(w, "Failed to update tour status", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"status":    "status updated",
+		"newStatus": request.Status.String(),
+	})
+}
+
+func (h *TourHandler) GetTourStatusInfo(w http.ResponseWriter, r *http.Request) {
+	tourIDHex := mux.Vars(r)["id"]
+	creatorIDStr := r.URL.Query().Get("creatorId")
+
+	tourID, err := primitive.ObjectIDFromHex(tourIDHex)
+	if err != nil {
+		http.Error(w, "Invalid tour ID format", http.StatusBadRequest)
+		return
+	}
+
+	tour, err := h.Service.GetTour(tourID)
+	if err != nil {
+		http.Error(w, "Tour not found", http.StatusNotFound)
+		return
+	}
+
+	creatorID, _ := strconv.Atoi(creatorIDStr)
+	canEdit := tour.CreatorID == creatorID
+
+	response := map[string]interface{}{
+		"currentStatus": tour.Status.String(),
+		"canEdit":       canEdit,
+		"publishedAt":   tour.PublishedAt,
+		"archivedAt":    tour.ArchivedAt,
+		"createdAt":     tour.CreatedAt,
+		"updatedAt":     tour.UpdatedAt,
+	}
+
+	json.NewEncoder(w).Encode(response)
 }
 
 func (h *TourHandler) GetAllTours(w http.ResponseWriter, r *http.Request) {
@@ -103,6 +192,9 @@ func (h *TourHandler) CreateTour(w http.ResponseWriter, r *http.Request) {
 	if tour.ID.IsZero() {
 		tour.ID = primitive.NewObjectID()
 	}
+	now := time.Now()
+	tour.CreatedAt = now
+	tour.UpdatedAt = now
 
 	if err := h.Service.CreateTour(&tour); err != nil {
 		log.Println("Failed to save tour:", err)
@@ -134,9 +226,65 @@ func (h *TourHandler) UpdateLength(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// DODAJ - vrati ažurirane metrics
+	updatedTour, err := h.Service.GetTour(tourID)
+	if err != nil {
+		http.Error(w, "Failed to get updated tour", http.StatusInternalServerError)
+		return
+	}
+
 	log.Println("Length updated successfully")
 
-	//w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"status": "length updated"})
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"status":      "length updated",
+		"tourLength":  updatedTour.TourLength,
+		"walkingTime": updatedTour.WalkingTime,
+		"bicycleTime": updatedTour.BicycleTime,
+		"carTime":     updatedTour.CarTime,
+	})
+}
+func (h *TourHandler) CalculateMetrics(w http.ResponseWriter, r *http.Request) {
+	var keypoints []model.KeyPoint
+
+	if err := json.NewDecoder(r.Body).Decode(&keypoints); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	length, walkingTime, bicycleTime, carTime := h.Service.CalculateTourMetrics(keypoints)
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"tourLength":  length,
+		"walkingTime": walkingTime,
+		"bicycleTime": bicycleTime,
+		"carTime":     carTime,
+	})
+}
+
+func (h *TourHandler) UpdateCost(w http.ResponseWriter, r *http.Request) {
+	tourIDHex := mux.Vars(r)["id"]
+	tourID, err := primitive.ObjectIDFromHex(tourIDHex)
+	if err != nil {
+		http.Error(w, "Invalid tour ID", http.StatusBadRequest)
+		return
+	}
+
+	var request struct {
+		Cost float64 `json:"cost"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.Service.UpdateTourCost(tourID, request.Cost); err != nil {
+		http.Error(w, "Failed to update cost", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"status": "cost updated"})
 }

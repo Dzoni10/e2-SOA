@@ -8,7 +8,7 @@ type KeyPoint struct {
 	Latitude    float64            `bson:"latitude" json:"latitude"`
 	Longitude   float64            `bson:"longitude" json:"longitude"`
 	Name        string             `bson:"name" json:"name"`
-	Description string             `bson:"desc" json:"desc"`
+	Description string             `bson:"description" json:"description"`
 	Order       int                `bson:"order" json:"order"`
 	Images      []string           `bson:"images,omitempty" json:"images"`
 }
