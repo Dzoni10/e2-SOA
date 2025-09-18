@@ -16,7 +16,7 @@
 }
 
 .tour-card {
-  min-height: fit-content;
+height: 700px;
   background: linear-gradient(135deg, #9e58b1, #2575fc);
   color: white;
   border-radius: 15px;

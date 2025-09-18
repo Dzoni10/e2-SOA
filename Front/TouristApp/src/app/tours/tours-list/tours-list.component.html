@@ -54,6 +54,13 @@
             Add Review
           </button>
         </mat-card-actions>
+
+        <mat-card-actions *ngIf="isAllTours">
+          <button mat-raised-button color="primary" (click)="startTour( item.tour)">
+            Start Tour
+          </button>
+        </mat-card-actions>
+
       </button>
     </mat-grid-tile>
   </div>
@@ -101,11 +108,7 @@
             Add Review
           </button>
         </mat-card-actions>
-        <mat-card-actions *ngIf="isAllTours">
-          <button mat-raised-button color="primary" (click)="startTour(tour)">
-            Start Tour
-          </button>
-        </mat-card-actions>
+  
       </mat-card>
     </mat-grid-tile>
     </div>
