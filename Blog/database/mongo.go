@@ -1,9 +1,8 @@
 package database
 
 import (
+	"blogs/logger"
 	"context"
-	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -39,15 +38,17 @@ func Init() {
 
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
-		log.Fatal("Cannot connect to MongoDB:", err)
+		logger.Error("Cannot connect to MongoDB", err)
+		os.Exit(1)
 	}
 
 	err = client.Ping(ctx, nil)
 	if err != nil {
-		log.Fatal("MongoDB ping failed:", err)
+		logger.Error("MongoDB ping failed", err)
+		os.Exit(1)
 	}
 
-	fmt.Println("MongoDB connected for Blogs")
+	logger.Info("MongoDB connected for Blogs")
 
 	Client = client
 	BlogCollection = client.Database(dbName).Collection(collName)
