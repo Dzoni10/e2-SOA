@@ -18,6 +18,13 @@ services:
     networks:
       - blogs-net
       - follower-net 
+      - monitoring
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        tag: docker.blog-service
+
   mongo_blogs:
     image: mongo:6
     container_name: mongo_blogs
@@ -27,16 +34,27 @@ services:
       - blog-mongo-data:/data/db
     networks:
       - blogs-net
+      - monitoring
     healthcheck:                    
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        tag: docker.mongo-blogs
+
 networks:
   blogs-net:
   follower-net: 
     external: true
     name: follower_follower-net
+  monitoring:
+    external: true
+    name: monitoring
+
 volumes:
   blog-mongo-data:

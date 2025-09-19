@@ -3,17 +3,27 @@ package main
 import (
 	"blogs/database"
 	"blogs/handler"
+	"blogs/logger"
 	"blogs/repo"
 	"blogs/service"
-	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
 
+	logger.Init("blog-service")
+
+	logger.Info("Starting blog service", logrus.Fields{
+		"port":    "8082",
+		"version": "1.0.0",
+	})
+
 	database.Init()
+	logger.Info("Database initialized successfully")
 
 	// Blogs setup
 	blogRepo := &repo.BlogRepository{}
@@ -30,6 +40,7 @@ func main() {
 	likeHandler := &handler.LikeHandler{Service: likeSrv}
 
 	r := mux.NewRouter()
+	r.Use(loggingMiddleware)
 
 	// Blogs routes
 	r.HandleFunc("/blogs/all", blogHandler.GetAllBlogs).Methods("GET")
@@ -55,6 +66,22 @@ func main() {
 		AllowCredentials: true,
 	})
 	*/
-	log.Println("Blog server running on port 8082")
-	log.Fatal(http.ListenAndServe(":8082", r))
+	logger.Info("Blog server running", logrus.Fields{"port": "8082"})
+
+	if err := http.ListenAndServe(":8082", r); err != nil {
+		logger.Error("Server failed to start", err)
+		os.Exit(1)
+
+	}
+}
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		logger.Info("HTTP Request", logrus.Fields{
+			"method":      r.Method,
+			"path":        r.URL.Path,
+			"remote_addr": r.RemoteAddr,
+			"user_agent":  r.UserAgent(),
+		})
+		next.ServeHTTP(w, r)
+	})
 }
