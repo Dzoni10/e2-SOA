@@ -1,17 +1,67 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
+	"os"
 	"tours/database"
 	"tours/handler"
+	"tours/metrics"
 	"tours/repo"
 	"tours/service"
 
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/jaeger"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 )
 
+var tp *sdktrace.TracerProvider
+
+const serviceName = "tour-service"
+
+func initTracer() (*sdktrace.TracerProvider, error) {
+	url := os.Getenv("JAEGER_ENDPOINT")
+
+	if url == "" {
+		url = "http://jaeger:14268/api/traces"
+	}
+
+	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(url)))
+
+	if err != nil {
+		return nil, err
+	}
+
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exp),
+		sdktrace.WithResource(resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceName(serviceName),
+		)),
+	)
+	otel.SetTracerProvider(tp)
+
+	return tp, nil
+}
+
 func main() {
+
+	metrics.InitMetrics()
+	var err error
+	tp, err = initTracer()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() { _ = tp.Shutdown(context.Background()) }()
+
+	//http.Handle("/metrics", promhttp.Handler())
 
 	database.Init()
 
@@ -37,6 +87,7 @@ func main() {
 
 	r := mux.NewRouter()
 
+	r.Handle("/metrics", promhttp.Handler())
 	r.HandleFunc("/tours/all", h.GetAllTours).Methods("GET")
 	r.HandleFunc("/tours/{id}", h.GetTour).Methods("GET")
 	r.HandleFunc("/tours", h.CreateTour).Methods("POST")

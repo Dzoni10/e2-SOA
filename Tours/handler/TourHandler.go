@@ -14,6 +14,8 @@ import (
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
 )
 
 type TourHandler struct {
@@ -122,12 +124,20 @@ func (h *TourHandler) GetAllTours(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *TourHandler) GetTour(w http.ResponseWriter, r *http.Request) {
+
+	tr := otel.Tracer("tour-service")
+
+	_, span := tr.Start(r.Context(), "GetTourHandler")
+	defer span.End()
+
 	idStr := mux.Vars(r)["id"]
 	log.Printf("User with id %s", idStr)
 
 	objID, err := primitive.ObjectIDFromHex(idStr)
 
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "invalid id")
 		http.Error(w, "Invalid ID format", http.StatusBadRequest)
 		return
 	}
@@ -137,13 +147,15 @@ func (h *TourHandler) GetTour(w http.ResponseWriter, r *http.Request) {
 	//w.Header().Set("Content-Type", "application/json")
 
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "not found")
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(map[string]string{"error": "Tour not found"})
 		return
 	}
 
+	span.AddEvent("Tour fetched from DB")
 	json.NewEncoder(w).Encode(tour)
-
 }
 
 /*

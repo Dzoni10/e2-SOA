@@ -1,0 +1,230 @@
+version: '3.9'
+
+services:
+  # --- Stakeholders ---
+  stakeholders-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: super
+      POSTGRES_DB: Stakeholders
+    ports:
+      - "5433:5432"
+    volumes:
+      - stakeholders-pgdata:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  stakeholders-backend:
+    build:
+      context: ./Stakeholders
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: stakeholders-db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: super
+      DB_NAME: Stakeholders
+    depends_on:
+      stakeholders-db:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  # --- Tours ---
+  tours-mongo:
+    image: mongo:6
+    ports:
+      - "27019:27017"
+    volumes:
+      - tours-mongo-data:/data/db
+    networks:
+      - tours-net
+
+  tours-backend:
+    build:
+      context: ./Tours
+    ports:
+      - "8081:8081"
+    environment:
+      MONGO_URI: mongodb://tours-mongo:27017
+      MONGO_DB: Tours
+      MONGO_COLLECTION: Tours
+    depends_on:
+      - tours-mongo
+    networks:
+      - tours-net
+
+  # --- Blog ---
+  blog-mongo:
+    image: mongo:6
+    ports:
+      - "27018:27017"
+    volumes:
+      - blog-mongo-data:/data/db
+    networks:
+      - blogs-net
+
+  blog-backend:
+    build:
+      context: ./Blog
+    ports:
+      - "8082:8082"
+    environment:
+      MONGO_URI: mongodb://blog-mongo:27017
+      MONGO_DB: Blogs
+      MONGO_COLLECTION: Blogs
+      FOLLOWER_SERVICE_URL: http://follower-service:8083
+    depends_on:
+      - blog-mongo
+    networks:
+      - blogs-net
+      - follower-net
+
+  # --- Followers ---
+  neo4j:
+    image: neo4j:5.15-community
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: neo4j/followers123
+    volumes:
+      - neo4j-data:/data
+    networks:
+      - follower-net
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p followers123 'MATCH (n) RETURN count(n);'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+
+  follower-service:
+    build:
+      context: ./Follower
+    ports:
+      - "8083:8083"
+    environment:
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USERNAME: neo4j
+      NEO4J_PASSWORD: followers123
+    depends_on:
+      - neo4j
+    networks:
+      - follower-net
+
+  # --- Gateway ---
+  gateway:
+    build:
+      context: ./Gateway
+    ports:
+      - "8070:8070"
+    depends_on:
+      - stakeholders-backend
+      - tours-backend
+      - blog-backend
+      - follower-service
+    networks:
+      - app-network
+      - tours-net
+      - blogs-net
+      - follower-net
+
+  # --- Monitoring stack (grafana/loki/jaeger/prometheus) ---
+  loki:
+    image: grafana/loki:main-5206e3a
+    networks:
+      - monitoring
+    ports:
+      - "3100:3100"
+
+  grafana:
+    image: grafana/grafana:8.5.3
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana:/var/lib/grafana
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    networks:
+      - monitoring
+
+  renderer:
+    image: grafana/grafana-image-renderer:3.10.5
+    environment:
+      ENABLE_METRICS: "true"
+    networks:
+      - monitoring
+
+  fluent-bit:
+    image: grafana/fluent-bit-plugin-loki:main
+    environment:
+      - LOKI_URL=http://loki:3100/loki/api/v1/push
+    volumes:
+      - ./monitoring/fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    networks:
+      - monitoring
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.34
+    ports:
+      - "9000:16686"
+    networks:
+      - monitoring
+
+  prometheus:
+    image: prom/prometheus:v2.35.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus:/etc/prometheus
+    networks:
+      - monitoring
+
+  node-exporter:
+    image: prom/node-exporter:v1.1.2
+    ports:
+      - "9100:9100"
+    networks:
+      - monitoring
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    ports:
+      - "8089:8080"
+    volumes:
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /sys:/sys:ro
+      - /var/run:/var/run:rw
+      
+    networks:
+      - monitoring
+
+volumes:
+  stakeholders-pgdata:
+  tours-mongo-data:
+  blog-mongo-data:
+  neo4j-data:
+  grafana:
+
+networks:
+  app-network:
+    driver: bridge
+  tours-net:
+    driver: bridge
+  blogs-net:
+    driver: bridge
+  follower-net:
+    driver: bridge
+  monitoring:
+    driver: bridge
