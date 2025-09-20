@@ -36,6 +36,11 @@ services:
         condition: service_healthy
     networks:
       - app-network
+    logging:                    # Add this
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        tag: stakeholders-backend
 
   # --- Tours ---
   tours-mongo:
@@ -60,6 +65,11 @@ services:
       - tours-mongo
     networks:
       - tours-net
+    logging:                    # Add this
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        tag: tours-backend
 
   # --- Blog ---
   blog-mongo:
@@ -86,6 +96,11 @@ services:
     networks:
       - blogs-net
       - follower-net
+    logging:                    # Add this
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        tag: blog-backend
 
   # --- Followers ---
   neo4j:
@@ -155,6 +170,10 @@ services:
       - ./grafana/provisioning:/etc/grafana/provisioning
     networks:
       - monitoring
+      - app-network      # Add this
+      - tours-net        # Add this  
+      - blogs-net        # Add this
+      - follower-net     # Add this
 
   renderer:
     image: grafana/grafana-image-renderer:3.10.5
@@ -187,9 +206,15 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus:/etc/prometheus
+      - ./monitoring/prometheus:/etc/prometheus  # Changed from ./prometheus
+      #- ./prometheus:/etc/prometheus
+      - prometheus:/var/lib/prometheus            # Add named volume
     networks:
       - monitoring
+      - app-network
+      - tours-net
+      - blogs-net
+      - follower-net
 
   node-exporter:
     image: prom/node-exporter:v1.1.2
@@ -216,6 +241,9 @@ volumes:
   blog-mongo-data:
   neo4j-data:
   grafana:
+    name: grafana        # Add explicit naming
+  prometheus:            # Add this volume
+    name: prometheus
 
 networks:
   app-network:
