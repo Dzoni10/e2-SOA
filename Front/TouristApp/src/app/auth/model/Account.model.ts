@@ -4,5 +4,6 @@ export interface Account
     name:string,
     surname: string,
     username:string,
-    role: number
+    role: number,
+    blocked: boolean
 }
