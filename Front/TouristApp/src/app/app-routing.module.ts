@@ -16,10 +16,12 @@ import { TourReviewComponent } from './tours/tour-review/tour-review.component';
 import { TourDetailsComponent } from './tours/tour-details/tour-details.component';
 import { PositionComponent } from './tours/position/position.component';
 import { TourExecutionComponent } from './tours/tour-execution/tour-execution.component';
+import { ProfileComponent } from './stakeholders/profile/profile.component';
 const routes: Routes = [
   {path: 'login', component:LoginComponent},
   {path: 'register', component:SignupComponent},
   {path: 'userAccounts', component: UserAccountsComponent},
+  {path: 'profile', component: ProfileComponent},
   {path: 'tourCreation', component: TourCreationComponent},
   {path: 'accounts', component:AccountsComponent},
   {path: 'toursList', component: ToursListComponent},

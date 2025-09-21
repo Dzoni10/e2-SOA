@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Account } from '../model/Account.model';
 import { AuthService } from '../auth.service';
+import { StakeholdersService } from 'src/app/stakeholders/stakeholders.service';
 
 @Component({
   selector: 'app-accounts',
@@ -13,7 +14,7 @@ export class AccountsComponent implements OnInit {
 
   loading=true;
 
-  constructor(private authService: AuthService){}
+  constructor(private authService: AuthService, private stakeholderService: StakeholdersService){}
 
   ngOnInit(): void {
     this.authService.getAccounts().subscribe({
@@ -27,6 +28,11 @@ export class AccountsComponent implements OnInit {
       }
     });
   }
+
+  
+blockUser(id: number){
+  this.stakeholderService.blockUser(id).subscribe();
+}
   
 
 }
