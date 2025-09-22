@@ -36,12 +36,17 @@ export class LoginComponent {
         console.log('Logged in succesfully');
         this.snackBar.open("Logged successfully!","Close",{duration:3000,horizontalPosition:"center"})
         const user = this.authService.getCurrentUser();
+        console.log(user)
         if(user?.role===0){
           this.router.navigate(['/userAccounts']);
         }
         else if(user?.role===1){
 
           this.router.navigate(['/toursList']);
+        }
+        else if(user?.role===2){
+
+          this.router.navigate(['/profile']);
         }
       },
       error: (err)=>{

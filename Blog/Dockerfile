@@ -1,20 +1,22 @@
-FROM golang:1.24.5-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
-WORKDIR /app
-
-COPY go.mod ./
-COPY go.sum ./
-RUN go mod download
+WORKDIR /build
 
 COPY . .
 
-RUN go build -o main -ldflags="-s -w" .
+WORKDIR /build/Blog
 
-FROM alpine:3.20
+RUN go mod download
 
-WORKDIR /app
+RUN go build -o main .
 
-COPY --from=builder /app/main .
+FROM alpine:latest
+
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /root/
+
+COPY --from=builder /build/Blog/main .
 
 EXPOSE 8082
 

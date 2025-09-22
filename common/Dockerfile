@@ -1,0 +1,8 @@
+# Stage za common code
+FROM golang:1.25-alpine AS common
+WORKDIR /common
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .

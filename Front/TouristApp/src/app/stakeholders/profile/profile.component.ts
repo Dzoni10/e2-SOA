@@ -1,16 +1,19 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { UserProfile } from '../model/user.model';
 import { StakeholdersService } from '../stakeholders.service';
 import { AuthService } from 'src/app/auth/auth.service';
+import { NotificationsService } from '../notifications.service';
+import { Subscription } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })
-export class ProfileComponent {
+export class ProfileComponent implements OnInit, OnDestroy {
   profileForm: FormGroup;
   isEditing = false;
   loading = true;
@@ -18,11 +21,14 @@ export class ProfileComponent {
   successMessage = '';
   errorMessage = '';
   userId: number = 0; // You'll need to get this from your auth service or route params
+  sub! : Subscription;
 
   constructor(
     private fb: FormBuilder,
     private stakeholderService: StakeholdersService,
-    private authService: AuthService
+    private authService: AuthService,
+    private notificationService: NotificationsService,
+    private snackBar:MatSnackBar
   ) {
     this.profileForm = this.fb.group({
       id: [''],
@@ -39,6 +45,22 @@ export class ProfileComponent {
   ngOnInit(): void {
     this.userId = this.authService.getCurrentUser()?.userId!
     this.loadUserProfile();
+    this.notificationService.connect(this.userId.toString());
+
+    this.sub = this.notificationService.notifications$.subscribe((notification) => {
+      console.log('New notification:', notification);
+      // Optionally show a toast, update badge, etc.
+      // Show snackbar
+      this.snackBar.open(
+        `New blog by author ${notification.authorId}: ${notification.title}`,
+        'Close',
+        {
+          duration: 4000,   // auto close after 4s
+          horizontalPosition: 'right',
+          verticalPosition: 'top'
+        }
+      );
+    });
   }
 
   loadUserProfile(): void {
@@ -117,5 +139,10 @@ export class ProfileComponent {
   private clearMessages(): void {
     this.successMessage = '';
     this.errorMessage = '';
+  }
+
+  ngOnDestroy() {
+    this.sub.unsubscribe();
+    this.notificationService.disconnect();
   }
 }

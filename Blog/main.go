@@ -6,6 +6,7 @@ import (
 	"blogs/logger"
 	"blogs/repo"
 	"blogs/service"
+	"local/common/saga/events"
 	"net/http"
 	"os"
 
@@ -25,9 +26,17 @@ func main() {
 	database.Init()
 	logger.Info("Database initialized successfully")
 
+	natsURL := os.Getenv("NATS_URL")
+	if natsURL == "" {
+		natsURL = "nats://nats:4222" // default za Docker
+	}
+	natsConn, _ := events.ConnectNATS(natsURL)
+
+	publisher := &events.Publisher{Conn: natsConn}
+
 	// Blogs setup
 	blogRepo := &repo.BlogRepository{}
-	blogSrv := &service.BlogService{Repo: blogRepo}
+	blogSrv := &service.BlogService{Repo: blogRepo, Publisher: publisher}
 	blogHandler := &handler.BlogHandler{Service: blogSrv}
 	commentRepo := &repo.CommentRepository{}
 	commentSrv := &service.CommentService{Repo: commentRepo}

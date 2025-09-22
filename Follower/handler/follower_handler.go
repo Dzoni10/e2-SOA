@@ -4,12 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"follower-service/model"
+	"follower-service/notifications"
 	"follower-service/service"
 	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 )
 
 type FollowerHandler struct {
@@ -253,4 +255,32 @@ func (h *FollowerHandler) GetFollowRecommendations(w http.ResponseWriter, r *htt
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(recommendations)
+}
+
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool { return true },
+}
+
+func (h *FollowerHandler) NotificationsWS(w http.ResponseWriter, r *http.Request) {
+	userID := r.URL.Query().Get("userId")
+	if userID == "" {
+		http.Error(w, "Missing userId", http.StatusBadRequest)
+		return
+	}
+
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		http.Error(w, "Failed to upgrade connection", http.StatusInternalServerError)
+		return
+	}
+
+	notifications.Register(userID, conn)
+	defer notifications.Unregister(userID)
+
+	for {
+		_, _, err := conn.ReadMessage()
+		if err != nil {
+			break
+		}
+	}
 }
