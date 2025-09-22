@@ -40,7 +40,7 @@ func startServer(handler *handler.GatewayHandler) {
 	router.PathPrefix("/keypoints").HandlerFunc(handler.HandleKeypoints)
 	router.PathPrefix("/position").HandlerFunc(handler.HandlePosition)
 	router.PathPrefix("/tour-executions").HandlerFunc(handler.HandleTourExecutions)
-
+	router.PathPrefix("/purchase").HandlerFunc(handler.HandlePurchase)
 	log.Println("Gateway started on :8070")
 	log.Fatal(http.ListenAndServe(":8070", withCORS(router)))
 }

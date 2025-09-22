@@ -17,6 +17,8 @@ import { TourDetailsComponent } from './tours/tour-details/tour-details.componen
 import { PositionComponent } from './tours/position/position.component';
 import { TourExecutionComponent } from './tours/tour-execution/tour-execution.component';
 import { ProfileComponent } from './stakeholders/profile/profile.component';
+import { PurchasedToursComponent } from './tours/purchased-tours/purchased-tours.component';
+import { CartComponent } from './cart/cart.component';
 const routes: Routes = [
   {path: 'login', component:LoginComponent},
   {path: 'register', component:SignupComponent},
@@ -35,8 +37,9 @@ const routes: Routes = [
   {path: 'tours/:id/reviews', component: TourReviewComponent },
   {path: 'tours/:id', component: TourDetailsComponent },
   {path: 'position', component: PositionComponent },
-  {path: 'tourExecution/:id', component: TourExecutionComponent}
-  
+  {path: 'tourExecution/:id', component: TourExecutionComponent},
+  {path: 'cart', component: CartComponent },
+  {path: 'purchasedTours', component: PurchasedToursComponent}
 
 ];
 
