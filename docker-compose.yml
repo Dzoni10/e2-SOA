@@ -1,6 +1,12 @@
 version: '3.9'
 
 services:
+
+  #common:
+    #build:
+      #context: ./common
+      #dockerfile: Dockerfile
+    #image: local/common   # daj mu ime, lokalno
   # --- Stakeholders ---
   stakeholders-db:
     image: postgres:15
@@ -83,7 +89,8 @@ services:
 
   blog-backend:
     build:
-      context: ./Blog
+      context: .
+      dockerfile: Blog/Dockerfile
     ports:
       - "8082:8082"
     environment:
@@ -91,8 +98,11 @@ services:
       MONGO_DB: Blogs
       MONGO_COLLECTION: Blogs
       FOLLOWER_SERVICE_URL: http://follower-service:8083
+      NATS_URL: nats://nats:4222
     depends_on:
       - blog-mongo
+      - nats
+      #- common
     networks:
       - blogs-net
       - follower-net
@@ -101,6 +111,16 @@ services:
       options:
         fluentd-address: localhost:24224
         tag: blog-backend
+
+   # --- NATS ---
+  nats:
+    image: nats:2.10
+    ports:
+      - "4222:4222"   # default client port
+      - "8222:8222"   # monitoring UI http://localhost:8222
+    networks:
+      - blogs-net
+      - follower-net
 
   # --- Followers ---
   neo4j:
@@ -123,15 +143,19 @@ services:
 
   follower-service:
     build:
-      context: ./Follower
+      context: .
+      dockerfile: Follower/Dockerfile
     ports:
       - "8083:8083"
     environment:
       NEO4J_URI: bolt://neo4j:7687
       NEO4J_USERNAME: neo4j
       NEO4J_PASSWORD: followers123
+      NATS_URL: nats://nats:4222
     depends_on:
       - neo4j
+      - nats
+      #- common
     networks:
       - follower-net
 
