@@ -1,0 +1,25 @@
+<div *ngIf="cart && cart.items && cart.items.length > 0; else emptyCart">
+  <h2>🛒 My Shopping Cart</h2>
+
+  <div class="cart-container">
+    <div class="cart-item" *ngFor="let item of cart.items">
+      <div class="cart-info">
+        <h3>{{ item.name }}</h3>
+        <p class="tour-id">ID: {{ item.tourId }}</p>
+        <p class="price">💰 {{ item.price }} RSD</p>
+      </div>
+
+      <!-- Dugme za brisanje -->
+      <button class="remove-btn" (click)="removeFromCart(item.tourId)">❌ Remove</button>
+    </div>
+  </div>
+
+  <div class="cart-total">
+    <h3>Total: <span>{{ cart.totalPrice }} RSD</span></h3>
+    <button class="checkout-btn" (click)="checkout()">Proceed to Checkout</button>
+  </div>
+</div>
+
+<ng-template #emptyCart>
+  <p>Your cart is empty 🛍️</p>
+</ng-template>

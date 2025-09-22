@@ -88,3 +88,11 @@ func (h *GatewayHandler) HandleTourExecutions(w http.ResponseWriter, r *http.Req
 	})
 	proxy.ServeHTTP(w, r)
 }
+
+func (h *GatewayHandler) HandlePurchase(w http.ResponseWriter, r *http.Request) {
+	proxy := httputil.NewSingleHostReverseProxy(&url.URL{
+		Scheme: "http",
+		Host:   "purchase-service:5000", // unutrašnji port u kontejneru
+	})
+	proxy.ServeHTTP(w, r)
+}

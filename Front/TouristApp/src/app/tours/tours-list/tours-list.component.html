@@ -50,8 +50,10 @@
           </button>
         </mat-card-actions>
         <mat-card-actions>
-          <button mat-raised-button color="primary" (click)="addReview(item.tour.id)">
-            Add Review
+          <button mat-raised-button color="primary" 
+                  (click)="addToCart(item.tour)"
+                  [disabled]="isDisabled(item.tour.id!) || !isLoggedTourist()">
+            Add to cart
           </button>
         </mat-card-actions>
 

@@ -21,6 +21,7 @@ import { TourDetailsComponent } from './tour-details/tour-details.component';
 import { PositionComponent } from './position/position.component';
 import { TourExecutionComponent } from './tour-execution/tour-execution.component';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { PurchasedToursComponent } from './purchased-tours/purchased-tours.component';
 
 
 
@@ -33,7 +34,8 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
     AddKeypointComponent,
     TourDetailsComponent,
     PositionComponent,
-    TourExecutionComponent
+    TourExecutionComponent,
+    PurchasedToursComponent
   ],
   imports: [
     CommonModule,
