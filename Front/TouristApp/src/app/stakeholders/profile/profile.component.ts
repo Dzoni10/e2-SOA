@@ -55,9 +55,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
         `New blog by author ${notification.authorId}: ${notification.title}`,
         'Close',
         {
-          duration: 4000,   // auto close after 4s
-          horizontalPosition: 'right',
-          verticalPosition: 'top'
+          duration: 9000,   // auto close after 4s
+          //horizontalPosition: 'right',
+          verticalPosition: 'bottom'
         }
       );
     });
@@ -142,7 +142,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.sub.unsubscribe();
-    this.notificationService.disconnect();
+    //this.sub.unsubscribe();
+    //this.notificationService.disconnect();
   }
 }

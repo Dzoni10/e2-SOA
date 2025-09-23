@@ -25,6 +25,13 @@ statusInfo!: TourStatusInfo;
 canEditStatus = false;
 currentUser: any;
 TourStatus = TourStatus;
+// Add this property to your component class:
+private fallbackPolyline: L.Polyline | null = null;
+private currentAttempt = 0;
+
+// Add these properties to your component class:
+private routeRequestInProgress = false;
+private routeDebounceTimer: any;
   constructor(
     private route: ActivatedRoute, private tourService: ToursService, private snackBar: MatSnackBar,private authService: AuthService
   ) {}
@@ -307,7 +314,31 @@ drawAllKeypoints() {
   }
 
   drawRoute() {
-  if (this.routeControl) this.routeControl.remove();
+  // Clear existing route
+  if (this.routeControl) {
+    this.routeControl.remove();
+    this.routeControl = null;
+  }
+
+  // Clear fallback line
+  if (this.fallbackPolyline) {
+    this.map.removeLayer(this.fallbackPolyline);
+    this.fallbackPolyline = null;
+  }
+
+  // Debounce multiple rapid calls
+  if (this.routeDebounceTimer) {
+    clearTimeout(this.routeDebounceTimer);
+  }
+
+  this.routeDebounceTimer = setTimeout(() => {
+    this.currentAttempt = 0;
+    this.executeRouting();
+  }, 300);
+}
+
+private executeRouting() {
+  if (this.routeRequestInProgress) return;
 
   const waypoints = this.keypoints
     .filter(kp => kp.latitude && kp.longitude)
@@ -315,29 +346,169 @@ drawAllKeypoints() {
 
   if (waypoints.length < 2) return;
 
-  this.routeControl = L.Routing.control({
-    waypoints,
-    router: L.Routing.osrmv1({
-      serviceUrl: 'https://router.project-osrm.org/route/v1',
-      profile: 'driving'
-    }),
-    addWaypoints: false,
-    //draggableWaypoints: false,
-    fitSelectedRoutes: true,
-    show: false, // ne prikazuje UI kontrole
-  }).addTo(this.map);
+  this.routeRequestInProgress = true;
+  this.tryRoutingServices(waypoints);
+}
 
-  // opcionalno promeni boju linije
-  this.routeControl.on('routesfound', (e: any) => {
-    const routes = e.routes;
-    if (!routes || routes.length === 0) return;
+private async tryRoutingServices(waypoints: any[]) {
+  // 1. Pokušaj sa OpenRouteService (primarni)
+  const orsSuccess = await this.tryOpenRouteService(waypoints);
+  if (orsSuccess) {
+    this.routeRequestInProgress = false;
+    return;
+  }
 
-    routes.forEach((r: any) => {
-      r.coordinates.forEach((c: any, i: number) => {
-        // Leaflet polylines automatski crtaju liniju, boja default je plava
-      });
+  // 2. Pokušaj sa OSRM alternative server
+  const osrmSuccess = await this.tryOSRMAlternative(waypoints);
+  if (osrmSuccess) {
+    this.routeRequestInProgress = false;
+    return;
+  }
+
+  // 3. Fallback na pravu liniju
+  this.showFallbackRoute();
+  this.routeRequestInProgress = false;
+}
+
+private async tryOpenRouteService(waypoints: any[]): Promise<boolean> {
+  console.log('Pokušavam OpenRouteService...');
+  
+  try {
+    // TODO: Dodaj svoj ORS API key ovde
+    const API_KEY = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImU0OGNkNWZjNDJkNTQwZmY5MmE4ZTc3Mjg3Y2RhOGY5IiwiaCI6Im11cm11cjY0In0='; // Uzmi sa https://openrouteservice.org/
+    
+    //if (API_KEY === 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImU0OGNkNWZjNDJkNTQwZmY5MmE4ZTc3Mjg3Y2RhOGY5IiwiaCI6Im11cm11cjY0In0=') {
+      //console.log('ORS API key nije postavljen');
+      //return false;
+    //}
+
+    const coordinates = waypoints.map(wp => [wp.latLng.lng, wp.latLng.lat]);
+    
+    const response = await fetch('https://api.openrouteservice.org/v2/directions/driving-car/geojson', {
+      method: 'POST',
+      headers: {
+        'Authorization': API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        coordinates: coordinates,
+        format: 'geojson'
+      })
     });
-  });
+
+    if (!response.ok) {
+      throw new Error(`ORS HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    if (data.features && data.features.length > 0) {
+      const routeCoords = data.features[0].geometry.coordinates.map((coord: number[]) => [coord[1], coord[0]]);
+      
+      // Kreiraj polyline za rutu
+      this.fallbackPolyline = L.polyline(routeCoords, {
+        color: '#3388ff',
+        weight: 4,
+        opacity: 0.8
+      }).addTo(this.map);
+
+      // Fit map to route
+      this.map.fitBounds(this.fallbackPolyline.getBounds().pad(0.1));
+
+      console.log('OpenRouteService uspešno!');
+      const distance = data.features[0].properties.segments[0].distance;
+      const duration = data.features[0].properties.segments[0].duration;
+      console.log(`Distanca: ${(distance / 1000).toFixed(1)} km, Vreme: ${Math.round(duration / 60)} min`);
+      
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    console.error('OpenRouteService greška:', error);
+    return false;
+  }
+}
+
+private async tryOSRMAlternative(waypoints: any[]): Promise<boolean> {
+  console.log('Pokušavam OSRM alternative server...');
+  
+  try {
+    const coordinates = waypoints.map(wp => `${wp.latLng.lng},${wp.latLng.lat}`).join(';');
+    
+    // Koristi javni OSRM server (ograničen broj zahteva)
+    const response = await fetch(`https://routing.openstreetmap.de/routed-car/route/v1/driving/${coordinates}?overview=full&geometries=geojson&steps=false`, {
+      method: 'GET',
+      headers: {
+        'User-Agent': 'LeafletRouting'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`OSRM HTTP ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (data.routes && data.routes.length > 0) {
+      const route = data.routes[0];
+      const routeCoords = route.geometry.coordinates.map((coord: number[]) => [coord[1], coord[0]]);
+      
+      // Kreiraj polyline za rutu
+      this.fallbackPolyline = L.polyline(routeCoords, {
+        color: '#3388ff',
+        weight: 4,
+        opacity: 0.8
+      }).addTo(this.map);
+
+      // Fit map to route
+      this.map.fitBounds(this.fallbackPolyline.getBounds().pad(0.1));
+      
+      console.log('OSRM alternative uspešno!');
+      console.log(`Distanca: ${(route.distance / 1000).toFixed(1)} km, Vreme: ${Math.round(route.duration / 60)} min`);
+      
+      return true;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('OSRM alternative greška:', error);
+    return false;
+  }
+}
+
+private showFallbackRoute() {
+  console.log('Svi routing servisi neuspešni - prikazujem pravu liniju');
+
+  if (this.keypoints.length >= 2) {
+    const latlngs = this.keypoints
+      .filter(kp => kp.latitude && kp.longitude)
+      .map(kp => [kp.latitude, kp.longitude] as [number, number]);
+
+    this.fallbackPolyline = L.polyline(latlngs, {
+      color: '#ff6b6b',
+      weight: 3,
+      opacity: 0.7,
+      dashArray: '10, 10' // Isprekidana linija
+    }).addTo(this.map);
+
+    // Fit map to show all points
+    const group = new L.FeatureGroup([this.fallbackPolyline]);
+    this.map.fitBounds(group.getBounds().pad(0.1));
+
+    // Izračunaj direktnu distancu
+    if (latlngs.length >= 2) {
+      let totalDistance = 0;
+      for (let i = 1; i < latlngs.length; i++) {
+        const from = L.latLng(latlngs[i-1]);
+        const to = L.latLng(latlngs[i]);
+        totalDistance += from.distanceTo(to);
+      }
+      console.log(`Direktna distanca: ${(totalDistance / 1000).toFixed(1)} km`);
+    }
+
+    this.showMessage('Routing servisi nedostupni - prikazana je direktna putanja');
+  }
 }
 
 
