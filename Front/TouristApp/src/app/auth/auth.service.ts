@@ -18,6 +18,8 @@ export class AuthService {
 
   private currentUserSubject = new BehaviorSubject<DecodedToken | null>(this.loadUserFromToken());
   currentUser$ = this.currentUserSubject.asObservable();
+  private authStatusSubject = new BehaviorSubject<boolean>(this.isLoggedIn());
+  public authStatus$ = this.authStatusSubject.asObservable();
 
   private apiUrl = 'http://localhost:8070/users'
   constructor(private http: HttpClient) { }
@@ -27,6 +29,7 @@ export class AuthService {
   }
 
   login(username: string, password: string){
+    this.authStatusSubject.next(true);
     const body = {username, password};
     return this.http.post<{token:string}>(`${this.apiUrl}/login`,body)
   }
@@ -50,6 +53,7 @@ export class AuthService {
   }
 
   logout(){
+    this.authStatusSubject.next(false);
     localStorage.removeItem('jwtToken');
     this.currentUserSubject.next(null);
   }
@@ -64,6 +68,32 @@ export class AuthService {
       }
     }
     return null;
+  }
+
+  isLoggedIn(): boolean {
+    const token = this.getToken();
+    if (!token) {
+      return false;
+    }
+
+    try {
+      const decoded = jwtDecode<DecodedToken>(token);
+      
+      // Proveri da li je token istekao
+      const currentTime = Date.now() / 1000; // konvertuj u sekunde
+      if (decoded.exp && decoded.exp < currentTime) {
+        // Token je istekao, ukloni ga
+        this.logout();
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      // Token nije valjan
+      console.error('Invalid token:', error);
+      this.logout();
+      return false;
+    }
   }
 
 }
