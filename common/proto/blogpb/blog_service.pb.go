@@ -9,6 +9,7 @@ package blogpb
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -25,7 +26,7 @@ type CreateBlogRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
 	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	Images        []string               `protobuf:"bytes,3,rep,name=images,proto3" json:"images,omitempty"`
+	Images        [][]byte               `protobuf:"bytes,3,rep,name=images,proto3" json:"images,omitempty"` // sada prima raw fajl bytes
 	CreatorId     int32                  `protobuf:"varint,4,opt,name=creator_id,json=creatorId,proto3" json:"creator_id,omitempty"`
 	Username      string                 `protobuf:"bytes,5,opt,name=username,proto3" json:"username,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -76,7 +77,7 @@ func (x *CreateBlogRequest) GetDescription() string {
 	return ""
 }
 
-func (x *CreateBlogRequest) GetImages() []string {
+func (x *CreateBlogRequest) GetImages() [][]byte {
 	if x != nil {
 		return x.Images
 	}
@@ -209,21 +210,75 @@ func (x *UpdateBlogRequest) GetCreatorID() int32 {
 	return 0
 }
 
+type Like struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        int32                  `protobuf:"varint,1,opt,name=userId,proto3" json:"userId,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=createdAt,proto3" json:"createdAt,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Like) Reset() {
+	*x = Like{}
+	mi := &file_blog_service_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Like) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Like) ProtoMessage() {}
+
+func (x *Like) ProtoReflect() protoreflect.Message {
+	mi := &file_blog_service_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Like.ProtoReflect.Descriptor instead.
+func (*Like) Descriptor() ([]byte, []int) {
+	return file_blog_service_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *Like) GetUserId() int32 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *Like) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
 type BlogResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	Username      string                 `protobuf:"bytes,4,opt,name=username,proto3" json:"username,omitempty"`
-	CreatorID     int32                  `protobuf:"varint,5,opt,name=creatorID,proto3" json:"creatorID,omitempty"` // fix here
+	CreatorID     int32                  `protobuf:"varint,5,opt,name=creatorID,proto3" json:"creatorID,omitempty"`
 	Images        []string               `protobuf:"bytes,6,rep,name=images,proto3" json:"images,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=createdAt,proto3" json:"createdAt,omitempty"`
+	Likes         []*Like                `protobuf:"bytes,8,rep,name=likes,proto3" json:"likes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *BlogResponse) Reset() {
 	*x = BlogResponse{}
-	mi := &file_blog_service_proto_msgTypes[3]
+	mi := &file_blog_service_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -235,7 +290,7 @@ func (x *BlogResponse) String() string {
 func (*BlogResponse) ProtoMessage() {}
 
 func (x *BlogResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_blog_service_proto_msgTypes[3]
+	mi := &file_blog_service_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -248,7 +303,7 @@ func (x *BlogResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BlogResponse.ProtoReflect.Descriptor instead.
 func (*BlogResponse) Descriptor() ([]byte, []int) {
-	return file_blog_service_proto_rawDescGZIP(), []int{3}
+	return file_blog_service_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *BlogResponse) GetId() string {
@@ -293,6 +348,20 @@ func (x *BlogResponse) GetImages() []string {
 	return nil
 }
 
+func (x *BlogResponse) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *BlogResponse) GetLikes() []*Like {
+	if x != nil {
+		return x.Likes
+	}
+	return nil
+}
+
 type BlogListResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Blogs         []*BlogResponse        `protobuf:"bytes,1,rep,name=blogs,proto3" json:"blogs,omitempty"`
@@ -302,7 +371,7 @@ type BlogListResponse struct {
 
 func (x *BlogListResponse) Reset() {
 	*x = BlogListResponse{}
-	mi := &file_blog_service_proto_msgTypes[4]
+	mi := &file_blog_service_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -314,7 +383,7 @@ func (x *BlogListResponse) String() string {
 func (*BlogListResponse) ProtoMessage() {}
 
 func (x *BlogListResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_blog_service_proto_msgTypes[4]
+	mi := &file_blog_service_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -327,7 +396,7 @@ func (x *BlogListResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BlogListResponse.ProtoReflect.Descriptor instead.
 func (*BlogListResponse) Descriptor() ([]byte, []int) {
-	return file_blog_service_proto_rawDescGZIP(), []int{4}
+	return file_blog_service_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *BlogListResponse) GetBlogs() []*BlogResponse {
@@ -345,7 +414,7 @@ type Empty struct {
 
 func (x *Empty) Reset() {
 	*x = Empty{}
-	mi := &file_blog_service_proto_msgTypes[5]
+	mi := &file_blog_service_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -357,7 +426,7 @@ func (x *Empty) String() string {
 func (*Empty) ProtoMessage() {}
 
 func (x *Empty) ProtoReflect() protoreflect.Message {
-	mi := &file_blog_service_proto_msgTypes[5]
+	mi := &file_blog_service_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -370,18 +439,18 @@ func (x *Empty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Empty.ProtoReflect.Descriptor instead.
 func (*Empty) Descriptor() ([]byte, []int) {
-	return file_blog_service_proto_rawDescGZIP(), []int{5}
+	return file_blog_service_proto_rawDescGZIP(), []int{6}
 }
 
 var File_blog_service_proto protoreflect.FileDescriptor
 
 const file_blog_service_proto_rawDesc = "" +
 	"\n" +
-	"\x12blog_service.proto\x12\x04blog\"\x9e\x01\n" +
+	"\x12blog_service.proto\x12\x04blog\x1a\x1fgoogle/protobuf/timestamp.proto\"\x9e\x01\n" +
 	"\x11CreateBlogRequest\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x16\n" +
-	"\x06images\x18\x03 \x03(\tR\x06images\x12\x1d\n" +
+	"\x06images\x18\x03 \x03(\fR\x06images\x12\x1d\n" +
 	"\n" +
 	"creator_id\x18\x04 \x01(\x05R\tcreatorId\x12\x1a\n" +
 	"\busername\x18\x05 \x01(\tR\busername\" \n" +
@@ -391,14 +460,20 @@ const file_blog_service_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1c\n" +
-	"\tcreatorID\x18\x04 \x01(\x05R\tcreatorID\"\xa8\x01\n" +
+	"\tcreatorID\x18\x04 \x01(\x05R\tcreatorID\"X\n" +
+	"\x04Like\x12\x16\n" +
+	"\x06userId\x18\x01 \x01(\x05R\x06userId\x128\n" +
+	"\tcreatedAt\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\x84\x02\n" +
 	"\fBlogResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1a\n" +
 	"\busername\x18\x04 \x01(\tR\busername\x12\x1c\n" +
 	"\tcreatorID\x18\x05 \x01(\x05R\tcreatorID\x12\x16\n" +
-	"\x06images\x18\x06 \x03(\tR\x06images\"<\n" +
+	"\x06images\x18\x06 \x03(\tR\x06images\x128\n" +
+	"\tcreatedAt\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12 \n" +
+	"\x05likes\x18\b \x03(\v2\n" +
+	".blog.LikeR\x05likes\"<\n" +
 	"\x10BlogListResponse\x12(\n" +
 	"\x05blogs\x18\x01 \x03(\v2\x12.blog.BlogResponseR\x05blogs\"\a\n" +
 	"\x05Empty2\xec\x01\n" +
@@ -422,30 +497,35 @@ func file_blog_service_proto_rawDescGZIP() []byte {
 	return file_blog_service_proto_rawDescData
 }
 
-var file_blog_service_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_blog_service_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_blog_service_proto_goTypes = []any{
-	(*CreateBlogRequest)(nil), // 0: blog.CreateBlogRequest
-	(*GetBlogRequest)(nil),    // 1: blog.GetBlogRequest
-	(*UpdateBlogRequest)(nil), // 2: blog.UpdateBlogRequest
-	(*BlogResponse)(nil),      // 3: blog.BlogResponse
-	(*BlogListResponse)(nil),  // 4: blog.BlogListResponse
-	(*Empty)(nil),             // 5: blog.Empty
+	(*CreateBlogRequest)(nil),     // 0: blog.CreateBlogRequest
+	(*GetBlogRequest)(nil),        // 1: blog.GetBlogRequest
+	(*UpdateBlogRequest)(nil),     // 2: blog.UpdateBlogRequest
+	(*Like)(nil),                  // 3: blog.Like
+	(*BlogResponse)(nil),          // 4: blog.BlogResponse
+	(*BlogListResponse)(nil),      // 5: blog.BlogListResponse
+	(*Empty)(nil),                 // 6: blog.Empty
+	(*timestamppb.Timestamp)(nil), // 7: google.protobuf.Timestamp
 }
 var file_blog_service_proto_depIdxs = []int32{
-	3, // 0: blog.BlogListResponse.blogs:type_name -> blog.BlogResponse
-	0, // 1: blog.BlogService.CreateBlog:input_type -> blog.CreateBlogRequest
-	1, // 2: blog.BlogService.GetBlog:input_type -> blog.GetBlogRequest
-	5, // 3: blog.BlogService.GetAllBlogs:input_type -> blog.Empty
-	2, // 4: blog.BlogService.UpdateBlog:input_type -> blog.UpdateBlogRequest
-	3, // 5: blog.BlogService.CreateBlog:output_type -> blog.BlogResponse
-	3, // 6: blog.BlogService.GetBlog:output_type -> blog.BlogResponse
-	4, // 7: blog.BlogService.GetAllBlogs:output_type -> blog.BlogListResponse
-	3, // 8: blog.BlogService.UpdateBlog:output_type -> blog.BlogResponse
-	5, // [5:9] is the sub-list for method output_type
-	1, // [1:5] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	7, // 0: blog.Like.createdAt:type_name -> google.protobuf.Timestamp
+	7, // 1: blog.BlogResponse.createdAt:type_name -> google.protobuf.Timestamp
+	3, // 2: blog.BlogResponse.likes:type_name -> blog.Like
+	4, // 3: blog.BlogListResponse.blogs:type_name -> blog.BlogResponse
+	0, // 4: blog.BlogService.CreateBlog:input_type -> blog.CreateBlogRequest
+	1, // 5: blog.BlogService.GetBlog:input_type -> blog.GetBlogRequest
+	6, // 6: blog.BlogService.GetAllBlogs:input_type -> blog.Empty
+	2, // 7: blog.BlogService.UpdateBlog:input_type -> blog.UpdateBlogRequest
+	4, // 8: blog.BlogService.CreateBlog:output_type -> blog.BlogResponse
+	4, // 9: blog.BlogService.GetBlog:output_type -> blog.BlogResponse
+	5, // 10: blog.BlogService.GetAllBlogs:output_type -> blog.BlogListResponse
+	4, // 11: blog.BlogService.UpdateBlog:output_type -> blog.BlogResponse
+	8, // [8:12] is the sub-list for method output_type
+	4, // [4:8] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_blog_service_proto_init() }
@@ -459,7 +539,7 @@ func file_blog_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_blog_service_proto_rawDesc), len(file_blog_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

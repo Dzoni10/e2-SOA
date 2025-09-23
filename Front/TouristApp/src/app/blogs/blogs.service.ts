@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Blog } from './model/blog.model';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -30,8 +30,21 @@ export class BlogsService {
     return this.http.post<Blog>(this.apiUrl, formData);
   }
 
-  getAllBlogs(): Observable<Blog[]>{
-    return this.http.get<Blog[]>(`${this.apiUrl}/all`);
+  //getAllBlogs(): Observable<Blog[]>{
+   // return this.http.get<Blog[]>(`${this.apiUrl}/all`);
+  //}
+
+   getAllBlogs(): Observable<Blog[]> {
+    return this.http.get<any>(`${this.apiUrl}/all`).pipe(
+      map(response => {
+        // ako response ima wrapper "blogs", uzmi njega
+        if (response.blogs) {
+          return response.blogs;
+        }
+        // ako je već niz (kao kod HTTP), samo vrati
+        return response;
+      })
+    );
   }
 
   getBlogsByCreator(creatorId: number): Observable<Blog[]>{

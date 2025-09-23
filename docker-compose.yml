@@ -181,7 +181,8 @@ services:
   # --- Gateway ---
   gateway:
     build:
-      context: ./Gateway
+      context: .
+      dockerfile: Gateway/Dockerfile
     ports:
       - "8070:8070"
     depends_on:

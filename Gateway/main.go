@@ -32,6 +32,7 @@ func main() {
 	gatewayHandler := &handler.GatewayHandler{}
 
 	// --- Blog rute preko gRPC ---
+
 	router.HandleFunc("/blogs/all", grpcHandler.GetAllBlogs).Methods("GET")
 	router.HandleFunc("/blogs/{id}", grpcHandler.GetBlog).Methods("GET")
 	router.HandleFunc("/blogs", grpcHandler.CreateBlog).Methods("POST")
