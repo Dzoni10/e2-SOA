@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"tours/metrics"
 	"tours/model"
 	"tours/service"
 
@@ -71,6 +72,9 @@ func (h *TourHandler) UpdateStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Increment metrics based on status
+	metrics.ToursCreated.WithLabelValues(request.Status.String()).Inc()
+
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{
 		"status":    "status updated",
@@ -110,17 +114,23 @@ func (h *TourHandler) GetTourStatusInfo(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *TourHandler) GetAllTours(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+
 	tours, err := h.Service.GetAllTours()
 
 	//w.Header().Set("Content-Type", "application/json")
-
+	status := http.StatusOK
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		status = http.StatusInternalServerError
+		w.WriteHeader(status)
 		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to fetch tours"})
-		return
+	} else {
+		json.NewEncoder(w).Encode(tours)
 	}
 
-	json.NewEncoder(w).Encode(tours)
+	duration := time.Since(start).Seconds()
+	metrics.RequestDuration.WithLabelValues("/tours/all").Observe(duration)
+	metrics.RequestCount.WithLabelValues("/tours/all", r.Method, fmt.Sprint(status)).Inc()
 }
 
 func (h *TourHandler) GetTour(w http.ResponseWriter, r *http.Request) {
@@ -155,6 +165,7 @@ func (h *TourHandler) GetTour(w http.ResponseWriter, r *http.Request) {
 	}
 
 	span.AddEvent("Tour fetched from DB")
+	//w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(tour)
 }
 
@@ -187,6 +198,10 @@ func (h *TourHandler) CreateTour(w http.ResponseWriter, r *http.Request) {
 */
 func (h *TourHandler) CreateTour(w http.ResponseWriter, r *http.Request) {
 
+	tr := otel.Tracer("tour-service")
+	_, span := tr.Start(r.Context(), "CreateTourHandler")
+	defer span.End()
+
 	// Optional: log request body
 	bodyBytes, _ := ioutil.ReadAll(r.Body)
 	fmt.Println("Request body:", string(bodyBytes))
@@ -196,6 +211,8 @@ func (h *TourHandler) CreateTour(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(r.Body).Decode(&tour); err != nil {
 		log.Println("Error decoding tour: ", err)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "invalid request body")
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
@@ -210,9 +227,15 @@ func (h *TourHandler) CreateTour(w http.ResponseWriter, r *http.Request) {
 
 	if err := h.Service.CreateTour(&tour); err != nil {
 		log.Println("Failed to save tour:", err)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "failed to save")
 		http.Error(w, "Failed to save tour", http.StatusInternalServerError)
 		return
 	}
+
+	// Increment tour creation metric
+	metrics.ToursCreated.WithLabelValues("draft").Inc()
+	span.AddEvent("Tour created successfully")
 
 	// Return the real MongoDB ID only
 	//w.Header().Set("Content-Type", "application/json")

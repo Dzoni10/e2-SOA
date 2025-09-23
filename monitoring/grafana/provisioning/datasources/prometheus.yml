@@ -5,5 +5,8 @@ datasources:
     type: prometheus
     access: proxy
     url: http://prometheus:9090
+    isDefault: true
     jsonData:
       maxLines: 1000
+      httpMethod: POST
+      queryTimeout: 30s

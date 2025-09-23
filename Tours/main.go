@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
+	"time"
 	"tours/database"
 	"tours/handler"
 	"tours/metrics"
@@ -16,6 +18,7 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
@@ -30,6 +33,9 @@ func initTracer() (*sdktrace.TracerProvider, error) {
 
 	if url == "" {
 		url = "http://jaeger:14268/api/traces"
+		log.Printf("Using default Jaeger endpoint: %s", url)
+	} else {
+		log.Printf("Using Jaeger endpoint from env: %s", url)
 	}
 
 	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(url)))
@@ -38,28 +44,105 @@ func initTracer() (*sdktrace.TracerProvider, error) {
 		return nil, err
 	}
 
-	tp := sdktrace.NewTracerProvider(
-		sdktrace.WithBatcher(exp),
-		sdktrace.WithResource(resource.NewWithAttributes(
-			semconv.SchemaURL,
+	// Kreiraj resource sa service info
+	res, err := resource.New(context.Background(),
+		resource.WithAttributes(
 			semconv.ServiceName(serviceName),
-		)),
+			semconv.ServiceVersion("1.0.0"),
+		),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exp, sdktrace.WithBatchTimeout(time.Second*5)),
+		sdktrace.WithResource(res),
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 	)
 	otel.SetTracerProvider(tp)
 
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+		propagation.Baggage{},
+	))
+
+	log.Println("Tracer initialized successfully")
+
 	return tp, nil
+}
+
+func tracingMiddleWate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		tracer := otel.Tracer(serviceName)
+
+		ctx := otel.GetTextMapPropagator().Extract(r.Context(), propagation.HeaderCarrier(r.Header))
+		ctx, span := tracer.Start(ctx, r.Method+" "+r.URL.Path)
+		defer span.End()
+
+		// Dodaj span context u request
+		r = r.WithContext(ctx)
+
+		// Pozovi sledeći handler
+		next.ServeHTTP(w, r)
+	})
+}
+
+// Middleware za Prometheus metrics
+func metricsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		
+		if r.URL.Path == "/metrics" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		start := time.Now()
+
+		// Custom ResponseWriter da uhvatimo status kod
+		lrw := &loggingResponseWriter{ResponseWriter: w, statusCode: 200}
+
+		next.ServeHTTP(lrw, r)
+
+		duration := time.Since(start).Seconds()
+		status := strconv.Itoa(lrw.statusCode)
+
+		// Zabelezi metrics
+		metrics.RequestDuration.WithLabelValues(r.URL.Path).Observe(duration)
+		metrics.RequestCount.WithLabelValues(r.URL.Path, r.Method, status).Inc()
+	})
+}
+
+type loggingResponseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (lrw *loggingResponseWriter) WriteHeader(code int) {
+	lrw.statusCode = code
+	lrw.ResponseWriter.WriteHeader(code)
 }
 
 func main() {
 
 	metrics.InitMetrics()
+	log.Println("Metrics initialized")
+
 	var err error
 	tp, err = initTracer()
 
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Failed to initialize tracer: %v", err)
+		log.Println("Continuing without tracing...")
+	} else {
+		defer func() {
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			defer cancel()
+			if err := tp.Shutdown(ctx); err != nil {
+				log.Printf("Error shutting down tracer: %v", err)
+			}
+		}()
 	}
-	defer func() { _ = tp.Shutdown(context.Background()) }()
 
 	//http.Handle("/metrics", promhttp.Handler())
 
@@ -86,6 +169,9 @@ func main() {
 	executionHandler := &handler.TourExecutionHandler{Service: executionSrv}
 
 	r := mux.NewRouter()
+
+	r.Use(tracingMiddleWate)
+	r.Use(metricsMiddleware)
 
 	r.Handle("/metrics", promhttp.Handler())
 	r.HandleFunc("/tours/all", h.GetAllTours).Methods("GET")
@@ -128,13 +214,6 @@ func main() {
 	r.HandleFunc("/tour-executions/{id}/update-location", executionHandler.UpdateLocation).Methods("PUT")
 	r.HandleFunc("/tour-executions/{id}/add-keypoint", executionHandler.AddCompletedKeyPoint).Methods("PUT")
 	r.HandleFunc("/tour-executions/{id}", executionHandler.GetExecutionById).Methods("GET")
-
-	/*corsHandler := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:4200"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "UPDATE", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Content-Type", "Authorization"},
-		AllowCredentials: true,
-	})*/
 
 	log.Println("Server running on port 8081")
 	log.Fatal(http.ListenAndServe(":8081", r))
