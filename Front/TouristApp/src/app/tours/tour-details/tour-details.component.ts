@@ -71,6 +71,277 @@ async loadTour(tourId: string) {
   }
 }
 
+// ----------------------- MAP -----------------------
+  initMap() {
+    if (!this.mapContainer) return;
+
+    this.map = L.map(this.mapContainer.nativeElement).setView([44.817, 20.456], 12);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(this.map);
+
+    this.keypointLayer = L.layerGroup().addTo(this.map);
+
+    this.drawAllKeypoints();
+    this.drawRoute();
+    this.enableAddingKeypoints();
+  }
+
+  private getMarkerIcon(): L.Icon {
+    return L.icon({
+      iconUrl: 'assets/markinjo.png',
+      iconSize: [40, 65],
+      iconAnchor: [20, 65],
+      popupAnchor: [0, -60]
+    });
+  }
+
+ // ------------------- CRTA SVE KEYPOINTE -------------------
+drawAllKeypoints() {
+  if (!this.keypointLayer) this.keypointLayer = L.layerGroup().addTo(this.map);
+  this.keypointLayer.clearLayers();
+
+  this.keypoints.forEach(kp => {
+    // Marker
+    const marker = L.marker([kp.latitude, kp.longitude], {
+      draggable: true,
+      icon: this.getMarkerIcon(),
+      riseOnHover: true
+    });
+
+    // Circle za veći clickable area
+    const clickCircle = L.circle([kp.latitude, kp.longitude], {
+      radius: 30, // u metrima
+      color: 'transparent',
+      fillColor: 'transparent',
+      weight: 0,
+      interactive: true
+    });
+
+    // Klik na circle otvara popup markera
+    clickCircle.on('click', () => marker.openPopup());
+
+    // Popup content
+    const popupContent = `
+      <div style="min-width:200px">
+        <h4>Edit Keypoint</h4>
+        <label>Name:</label><br>
+        <input id="kp-name-${kp.id}" type="text" value="${kp.name}" style="width:100%"/><br>
+        <label>Description:</label><br>
+        <textarea id="kp-desc-${kp.id}" style="width:100%">${kp.description}</textarea><br>
+        <label>Image:</label><br>
+        <input id="kp-img-${kp.id}" type="file" accept="image/*" /><br><br>
+        <button id="kp-save-${kp.id}">💾 Save</button>
+        <button id="kp-delete-${kp.id}">❌ Delete</button>
+      </div>
+    `;
+    marker.bindPopup(popupContent);
+
+    // Popup open event za listener-e
+    marker.on('popupopen', () => {
+      const saveBtn = document.getElementById(`kp-save-${kp.id}`);
+      if (saveBtn) saveBtn.addEventListener('click', () => this.saveKeypoint(kp, marker), { once: true });
+
+      const delBtn = document.getElementById(`kp-delete-${kp.id}`);
+      if (delBtn) delBtn.addEventListener('click', () => this.deleteKeypoint(kp), { once: true });
+    });
+
+    // Dragging markera
+    marker.on('dragend', (event: any) => {
+      const latlng = event.target.getLatLng();
+      kp.latitude = latlng.lat;
+      kp.longitude = latlng.lng;
+      clickCircle.setLatLng(latlng);
+      this.drawRoute();
+    });
+
+    kp.marker = marker;
+    kp.clickCircle = clickCircle;
+
+    this.keypointLayer.addLayer(marker);
+    this.keypointLayer.addLayer(clickCircle);
+  });
+}
+
+
+  saveKeypoint(kp: Keypoint, marker: L.Marker) {
+    const nameInput = (document.getElementById(`kp-name-${kp.id}`) as HTMLInputElement).value;
+    const descInput = (document.getElementById(`kp-desc-${kp.id}`) as HTMLTextAreaElement).value;
+    const imgInput = (document.getElementById(`kp-img-${kp.id}`) as HTMLInputElement).files?.[0];
+
+    kp.name = nameInput;
+    kp.description = descInput;
+
+    const formData = new FormData();
+    formData.append("name", kp.name);
+    formData.append("description", kp.description || "");
+    formData.append("latitude", kp.latitude.toString());
+    formData.append("longitude", kp.longitude.toString());
+    if (imgInput) formData.append("image", imgInput);
+
+    if (kp.id) {
+      this.tourService.updateKeypoint(kp.id, formData).subscribe(() => marker.closePopup());
+    }
+  }
+
+  deleteKeypoint(kp: Keypoint) {
+    if (kp.id) {
+        if (kp['marker']) this.keypointLayer.removeLayer(kp['marker']);
+        this.keypoints = this.keypoints.filter(k => k !== kp);
+        this.drawRoute();
+
+    } else {
+      // new unsaved keypoint
+      if (kp['marker']) this.keypointLayer.removeLayer(kp['marker']);
+      this.keypoints = this.keypoints.filter(k => k !== kp);
+      this.drawRoute();
+    }
+  }
+
+  enableAddingKeypoints() {
+  this.map.on('click', (e: L.LeafletMouseEvent) => {
+    // Proveri da li je klik unutar bilo kojeg postojeceg circle-a
+    const isInsideExisting = this.keypoints.some(kp => {
+      if (!kp.clickCircle) return false;
+      return kp.clickCircle.getBounds().contains(e.latlng);
+    });
+    if (isInsideExisting) return; // ne kreiraj novi
+
+    // Novi keypoint
+    const newKp: Keypoint = {
+      name: 'New Keypoint',
+      description: '',
+      latitude: e.latlng.lat,
+      longitude: e.latlng.lng,
+      images: [],
+      order: this.keypoints.length
+    };
+
+    // Marker
+    const marker = L.marker([newKp.latitude, newKp.longitude], {
+      draggable: true,
+      icon: this.getMarkerIcon(),
+      riseOnHover: true
+    });
+
+    // Circle
+    const clickCircle = L.circle([newKp.latitude, newKp.longitude], {
+      radius: 30,
+      color: 'transparent',
+      fillColor: 'transparent',
+      weight: 0,
+      interactive: true
+    });
+    clickCircle.on('click', () => marker.openPopup());
+
+    // Popup content
+    const popupContent = `
+      <div style="min-width:200px">
+        <h4>New Keypoint</h4>
+        <label>Name:</label><br>
+        <input id="new-kp-name" type="text" style="width:100%"/><br>
+        <label>Description:</label><br>
+        <textarea id="new-kp-desc" style="width:100%"></textarea><br>
+        <label>Image:</label><br>
+        <input id="new-kp-img" type="file" accept="image/*" /><br><br>
+        <button id="new-kp-save">➕ Add</button>
+      </div>
+    `;
+    marker.bindPopup(popupContent).openPopup();
+
+    marker.on('popupopen', () => {
+      const saveBtn = document.getElementById("new-kp-save");
+      if (saveBtn) {
+        saveBtn.addEventListener("click", () => {
+          const nameInput = (document.getElementById("new-kp-name") as HTMLInputElement).value;
+          const descInput = (document.getElementById("new-kp-desc") as HTMLTextAreaElement).value;
+          const imgInput = (document.getElementById("new-kp-img") as HTMLInputElement).files?.[0];
+
+          newKp.name = nameInput;
+          newKp.description = descInput;
+
+          const formData = new FormData();
+          formData.append("name", newKp.name);
+          formData.append("description", newKp.description || "");
+          formData.append("latitude", newKp.latitude.toString());
+          formData.append("longitude", newKp.longitude.toString());
+          if (imgInput) formData.append("image", imgInput);
+
+          //this.tourService.createKeypoint(formData).subscribe(savedKp => {
+            //newKp.id = savedKp.id;
+            const tourId = this.route.snapshot.paramMap.get('id');
+            newKp.tourId = tourId! 
+            marker.closePopup();
+            this.drawRoute();
+          //});
+        }, { once: true });
+      }
+    });
+
+    // Drag marker
+    marker.on('dragend', (event: any) => {
+      const latlng = event.target.getLatLng();
+      newKp.latitude = latlng.lat;
+      newKp.longitude = latlng.lng;
+      clickCircle.setLatLng(latlng);
+      this.drawRoute();
+    });
+
+    newKp.marker = marker;
+    newKp.clickCircle = clickCircle;
+
+    this.keypoints.push(newKp);
+    this.keypointLayer.addLayer(marker);
+    this.keypointLayer.addLayer(clickCircle);
+  });
+}
+
+
+  updateKeypointPosition(kp: Keypoint, event: any) {
+    const latlng = event.target.getLatLng();
+    kp.latitude = latlng.lat;
+    kp.longitude = latlng.lng;
+    this.keypoints.sort((a, b) => (a.order || 0) - (b.order || 0));
+    this.drawRoute();
+  }
+
+  drawRoute() {
+  if (this.routeControl) this.routeControl.remove();
+
+  const waypoints = this.keypoints
+    .filter(kp => kp.latitude && kp.longitude)
+    .map(kp => L.Routing.waypoint(L.latLng(kp.latitude, kp.longitude)));
+
+  if (waypoints.length < 2) return;
+
+  this.routeControl = L.Routing.control({
+    waypoints,
+    router: L.Routing.osrmv1({
+      serviceUrl: 'https://router.project-osrm.org/route/v1',
+      profile: 'driving'
+    }),
+    addWaypoints: false,
+    //draggableWaypoints: false,
+    fitSelectedRoutes: true,
+    show: false, // ne prikazuje UI kontrole
+  }).addTo(this.map);
+
+  // opcionalno promeni boju linije
+  this.routeControl.on('routesfound', (e: any) => {
+    const routes = e.routes;
+    if (!routes || routes.length === 0) return;
+
+    routes.forEach((r: any) => {
+      r.coordinates.forEach((c: any, i: number) => {
+        // Leaflet polylines automatski crtaju liniju, boja default je plava
+      });
+    });
+  });
+}
+
+
+
 
 publishTour(): void {
   if (!this.canEditStatus) {
@@ -167,20 +438,6 @@ canReactivate(): boolean {
   return this.canEditStatus && (this.statusInfo?.currentStatus === 'Archived');
 }
 
-  initMap() {
-    if (!this.mapContainer) return;
-    console.log("mapa tura")
-    this.map = L.map(this.mapContainer.nativeElement).setView([44.817, 20.456], 12);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-      
-    }).addTo(this.map);
-
-    this.drawKeypoints();
-    this.drawRoute();
-    this.enableAddingKeypoints();
-  }
-
   drawKeypoints() {
     // Create layer group if not exists
   if (!this.keypointLayer) {
@@ -260,15 +517,17 @@ canReactivate(): boolean {
 
 createKeypoint(lat: number, lng: number) {
   const newKeypoint: Keypoint = {
-    id: undefined, // backend will assign
+    // id ne definišemo – backend će ga dodeliti tek kada se snimi
     name: "",
     description: "",
     latitude: lat,
     longitude: lng,
-    images: []
+    images: [],
+    tourId: this.route.snapshot.paramMap.get("id")! // odmah vežemo za turu
   };
 
   const marker = L.marker([lat, lng], { draggable: true }).addTo(this.map);
+
   const popupContent = `
     <div style="min-width:200px">
       <h4>New Keypoint</h4>
@@ -287,7 +546,7 @@ createKeypoint(lat: number, lng: number) {
 
   marker.bindPopup(popupContent).openPopup();
 
-  marker.on('popupopen', () => {
+  marker.on("popupopen", () => {
     const saveBtn = document.getElementById("new-kp-save");
     if (saveBtn) {
       saveBtn.addEventListener("click", () => {
@@ -298,74 +557,24 @@ createKeypoint(lat: number, lng: number) {
         newKeypoint.name = nameInput;
         newKeypoint.description = descInput;
 
-        const formData = new FormData();
-        formData.append("name", newKeypoint.name);
-        formData.append("description", newKeypoint.description || "");
-        formData.append("latitude", newKeypoint.latitude.toString());
-        formData.append("longitude", newKeypoint.longitude.toString());
-        if (imgInput) formData.append("image", imgInput);
+        if (imgInput) {
+          //newKeypoint.images = [imgInput]; // lokalno čuvamo fajl
+        }
 
-        this.tourService.createKeypoint(formData).subscribe(savedKp => {
-          newKeypoint.id = savedKp.id;
-          this.keypoints.push(newKeypoint);
-          marker.closePopup();
-        });
+        // Samo dodajemo u front niz, bez poziva backend-a
+        this.keypoints.push(newKeypoint);
+
+        marker.closePopup();
       });
     }
   });
 
   marker.on("dragend", (event: any) => this.updateKeypointPosition(newKeypoint, event));
-  newKeypoint['marker'] = marker;
+
+  // Čuvamo marker u objektu radi kasnijeg manipulisanja
+  (newKeypoint as any).marker = marker;
 }
 
-
-  drawRoute() {
-    if (this.routeControl) this.routeControl.remove();
-
-    const waypoints = this.keypoints!.map(kp => L.latLng(kp.latitude, kp.longitude));
-    if (waypoints.length < 2) return;
-
-    this.routeControl = L.Routing.control({
-      waypoints,
-      lineOptions: {
-        styles: [{ color: 'blue', weight: 4 }],
-        extendToWaypoints: false,
-        missingRouteTolerance: 0
-      },
-      router: L.Routing.osrmv1({ serviceUrl: 'https://router.project-osrm.org/route/v1' }),
-      //draggableWaypoints: false,
-      addWaypoints: false
-    }).addTo(this.map);
-  }
-
-  enableAddingKeypoints() {
-    this.map.on('click', (e: L.LeafletMouseEvent) => {
-      const newKp: Keypoint = {
-        name: 'New Keypoint',
-        description: '',
-        latitude: e.latlng.lat,
-        longitude: e.latlng.lng,
-        images: [],
-        order: this.keypoints!.length + 1
-      };
-      this.keypoints!.push(newKp);
-      this.drawKeypoints();
-      this.drawRoute();
-    });
-  }
-
-  updateKeypointPosition(kp: Keypoint, event: any) {
-    const latlng = event.target.getLatLng();
-    kp.latitude = latlng.lat;
-    kp.longitude = latlng.lng;
-    this.drawRoute();
-  }
-
-  deleteKeypoint(kp: Keypoint) {
-    if (kp['marker']) this.map.removeLayer(kp['marker']);
-    this.keypoints = this.keypoints!.filter(k => k !== kp);
-    this.drawRoute();
-  }
 
   saveTourUpdates() {
   if (!this.tour) return;
@@ -378,28 +587,28 @@ createKeypoint(lat: number, lng: number) {
     formData.append("description", kp.description || "");
     formData.append("latitude", kp.latitude.toString());
     formData.append("longitude", kp.longitude.toString());
-    formData.append("order", index.toString()); // 👈 maintain order
-    formData.append("tourId", this.tour.id!);
+    formData.append("order", (index + 1).toString()); // redosled iz niza
+    formData.append("tourId", this.tour!.id!);
 
-    if (kp.images) {
-      formData.append("images", String(kp.images));
+    if (kp.images && kp.images.length > 0) {
+      // Ako si čuvao fajlove u kp.images
+      kp.images.forEach(img => formData.append("images", img));
     }
 
     if (kp.id) {
-      // Existing → update
+      // Update postojeće tačke
       updateCalls.push(this.tourService.updateKeypoint(kp.id, formData));
     } else {
-      // New → create
+      // Novi keypoint → create
       updateCalls.push(this.tourService.createKeypoint(formData));
     }
   });
 
-  // Wait for all updates/creates
   forkJoin(updateCalls).subscribe({
     next: (results) => {
       console.log("All keypoints saved in order:", results);
 
-      // After all keypoints persisted → update tour length
+      // Onda update dužine ture
       this.tourService.updateTourLength(this.tour!.id!).subscribe({
         next: () => console.log("Tour length updated"),
         error: (err) => console.error("Tour length update failed", err)
@@ -408,6 +617,7 @@ createKeypoint(lat: number, lng: number) {
     error: (err) => console.error("Keypoint save failed", err)
   });
 }
+
 
 updateTourCost(): void {
   if (!this.tour || !this.canEditStatus) return;

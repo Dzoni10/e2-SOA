@@ -9,4 +9,5 @@ export interface Keypoint {
   images: string[];
   formData?: FormData;
   marker?: L.Marker; // optional property
+  clickCircle?: L.Circle; // ← dodaj ovo
 }
