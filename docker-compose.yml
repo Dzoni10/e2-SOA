@@ -88,6 +88,7 @@ services:
       dockerfile: Blog/Dockerfile
     ports:
       - "8082:8082"
+      - "50051:50051"
     environment:
       MONGO_URI: mongodb://blog-mongo:27017
       MONGO_DB: Blogs

@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package blog;
+option go_package = "local/common/proto/blogpb";
+
+service BlogService {
+  rpc CreateBlog (CreateBlogRequest) returns (BlogResponse);
+  rpc GetBlog (GetBlogRequest) returns (BlogResponse);
+  rpc GetAllBlogs (Empty) returns (BlogListResponse);
+  rpc UpdateBlog (UpdateBlogRequest) returns (BlogResponse);
+}
+
+message CreateBlogRequest {
+  string title = 1;
+  string description = 2;
+  repeated string images = 3;
+  int32 creator_id = 4;
+  string username = 5;
+}
+
+message GetBlogRequest {
+  string id = 1;
+}
+
+message UpdateBlogRequest {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  int32 creatorID = 4;
+}
+
+message BlogResponse {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  string username = 4;
+  int32 creatorID = 5; // fix here
+  repeated string images = 6;
+}
+
+message BlogListResponse {
+  repeated BlogResponse blogs = 1;
+}
+
+message Empty {}

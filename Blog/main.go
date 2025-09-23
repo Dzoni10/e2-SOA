@@ -6,12 +6,16 @@ import (
 	"blogs/logger"
 	"blogs/repo"
 	"blogs/service"
+	pb "local/common/proto/blogpb"
 	"local/common/saga/events"
+	"log"
+	"net"
 	"net/http"
 	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -75,6 +79,24 @@ func main() {
 		AllowCredentials: true,
 	})
 	*/
+
+	// ----------------- gRPC Setup -----------------
+	go func() {
+		grpcListener, err := net.Listen("tcp", ":50051")
+		if err != nil {
+			log.Fatalf("Failed to listen on gRPC port: %v", err)
+		}
+
+		grpcServer := grpc.NewServer()
+		blogGrpcHandler := &handler.BlogGrpcHandler{Service: blogSrv}
+		pb.RegisterBlogServiceServer(grpcServer, blogGrpcHandler)
+
+		logger.Info("gRPC server listening on :50051")
+		if err := grpcServer.Serve(grpcListener); err != nil {
+			log.Fatalf("Failed to serve gRPC: %v", err)
+		}
+	}()
+
 	logger.Info("Blog server running", logrus.Fields{"port": "8082"})
 
 	if err := http.ListenAndServe(":8082", r); err != nil {
