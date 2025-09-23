@@ -11,6 +11,16 @@
         </mat-card-header>
         <mat-card-content>
           <p><strong>Role:</strong> {{ account.role }}</p>
+          <button *ngIf="!account.blocked"
+                  class="block-btn"
+                  (click)="blockUser(account.id)">
+            Block
+          </button>
+
+          <!-- Show label if blocked -->
+          <span *ngIf="account.blocked" class="blocked-label">
+            Blocked
+          </span>
         </mat-card-content>
       </mat-card>
     </mat-grid-tile>

@@ -44,4 +44,7 @@ export class NavbarComponent implements OnInit {
     return this.user?.role===2  // ovde sam promenio sa 1 na 2 jer je 2 uloga autora (guide) 
 
   }
+  isLoggedTourist(): boolean{
+    return this.user?.role===1
+  }
 }

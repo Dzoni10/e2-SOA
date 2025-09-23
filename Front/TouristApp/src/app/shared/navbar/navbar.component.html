@@ -4,13 +4,16 @@
     <div class="navbar-buttons">
         <button mat-raised-button *ngIf="isLoggedIn()&&isLoggedAdmin()" class="accounts-button" [routerLink]="['accounts']">Accounts</button>
         <button mat-raised-button *ngIf="isLoggedIn()&&isLoggedAuthor()" class="tours-button" [routerLink]="['toursList']">My Tours</button>
+        <button mat-raised-button *ngIf="isLoggedIn()&&isLoggedTourist()" class="tours-button" [routerLink]="['purchasedTours']">Purchased Tours</button>
         <button mat-raised-button *ngIf="isLoggedIn()" class="position-button" [routerLink]="['position']">Position</button>
         <button mat-raised-button *ngIf="isLoggedIn()" class="tours-button" [routerLink]="['allTours']">All tours</button>
         <button mat-raised-button *ngIf="isLoggedIn()&&isLoggedAuthor()" class="tour-creation-button" [routerLink]="['tourCreation']">Create tour</button>
         <button mat-raised-button *ngIf="isLoggedIn()" class="blogs-button" [routerLink]="['blogsList']">All Blogs</button>
         <button mat-raised-button *ngIf="isLoggedIn()" class="blog-creation-button" [routerLink]="['blogCreation']">Create Blog</button>
         <button mat-raised-button *ngIf="isLoggedIn()" class="blog-creation-button" [routerLink]="['recommendations']">Recommendations</button>
+        <button mat-raised-button *ngIf="isLoggedIn()" class="profile-button" [routerLink]="['profile']">Profile</button>
         <button mat-raised-button *ngIf="!isLoggedIn()" class="login-button" [routerLink]="['login']">Log in</button>
         <button mat-raised-button *ngIf="isLoggedIn()" class="logout-button" (click)="logout()">Log out</button>
+        <button mat-raised-button *ngIf="isLoggedIn()&&isLoggedTourist()" class="position-button" [routerLink]="['cart']">🛒 My Cart</button>
     </div>
 </div>

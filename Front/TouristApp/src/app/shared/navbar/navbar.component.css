@@ -144,7 +144,7 @@
     box-shadow: none ;
 }
 
-.tours-button, .position-button{
+.tours-button, .position-button, .profile-button{
     background-color:#412fb7;
     color:  #f7f6f5;
     box-shadow: none ;
@@ -157,7 +157,7 @@
     margin-right: 10px;
 }
 
-.tours-button:hover, .position-button:hover{
+.tours-button:hover, .position-button:hover, .profile-button:hover{
     background-color: #6354c7 ;
     color: #becbd2 ;
     box-shadow: none ;

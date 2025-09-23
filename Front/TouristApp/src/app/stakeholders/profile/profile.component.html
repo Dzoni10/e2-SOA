@@ -1,0 +1,109 @@
+<div class="profile-container">
+  <div class="profile-card">
+    <!-- Header -->
+    <div class="profile-header">
+      <h2>User Profile</h2>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Loading profile...</p>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div *ngIf="successMessage" class="message success">
+      {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="message error">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Profile Form -->
+    <form *ngIf="!loading" [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="profile-form">
+      
+      <!-- Profile Image -->
+      <div class="image-section">
+        <div class="image-container">
+          <img [src]="profileForm.get('image')?.value || '/assets/default-avatar.jpg'" 
+               alt="Profile Image" 
+               class="profile-image">
+          <button *ngIf="isEditing" type="button" class="camera-btn">
+            📷
+          </button>
+        </div>
+        
+        <div *ngIf="isEditing" class="form-group">
+          <label>Profile Image URL</label>
+          <input type="url" formControlName="image" class="form-input" placeholder="https://example.com/image.jpg">
+        </div>
+      </div>
+
+      <!-- Form Fields Grid -->
+      <div class="form-grid">
+        
+        <!-- Name -->
+        <div class="form-group">
+          <label>Name</label>
+          <input *ngIf="isEditing" type="text" formControlName="name" class="form-input" maxlength="20">
+          <div *ngIf="!isEditing" class="display-field">{{ profileForm.get('name')?.value }}</div>
+        </div>
+
+        <!-- Surname -->
+        <div class="form-group">
+          <label>Surname</label>
+          <input *ngIf="isEditing" type="text" formControlName="surname" class="form-input" maxlength="40">
+          <div *ngIf="!isEditing" class="display-field">{{ profileForm.get('surname')?.value }}</div>
+        </div>
+
+        <!-- Username (Read-only) -->
+        <div class="form-group">
+          <label>Username</label>
+          <div class="readonly-field">{{ profileForm.get('username')?.value }}</div>
+          <small>Username cannot be changed</small>
+        </div>
+
+        <!-- Role (Read-only) -->
+        <div class="form-group">
+          <label>Role</label>
+          <div class="readonly-field">
+            <span class="role-badge" [ngClass]="getRoleClass()">
+              {{ profileForm.get('role')?.value }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Motto -->
+      <div class="form-group full-width">
+        <label>Motto</label>
+        <input *ngIf="isEditing" type="text" formControlName="moto" class="form-input" placeholder="Your personal motto...">
+        <div *ngIf="!isEditing" class="display-field italic">"{{ profileForm.get('moto')?.value }}"</div>
+      </div>
+
+      <!-- Bio -->
+      <div class="form-group full-width">
+        <label>Bio</label>
+        <textarea *ngIf="isEditing" formControlName="bio" class="form-textarea" rows="4" placeholder="Tell us about yourself..."></textarea>
+        <div *ngIf="!isEditing" class="display-field bio-display">{{ profileForm.get('bio')?.value }}</div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="button-group">
+        <button *ngIf="!isEditing" type="button" (click)="startEdit()" class="btn btn-primary">
+          Edit Profile
+        </button>
+        
+        <ng-container *ngIf="isEditing">
+          <button type="button" (click)="cancelEdit()" class="btn btn-secondary">
+            Cancel
+          </button>
+          <button type="submit" [disabled]="!profileForm.dirty || saving" class="btn btn-success">
+            <span *ngIf="!saving">Save Changes</span>
+            <span *ngIf="saving">Saving...</span>
+          </button>
+        </ng-container>
+      </div>
+    </form>
+  </div>
+</div>

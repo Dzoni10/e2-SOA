@@ -4,6 +4,7 @@ import { ToursService } from '../tours.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+import { CartService } from '../../cart/cart.service';
 
 @Component({
   selector: 'app-tours-list',
@@ -19,9 +20,11 @@ export class ToursListComponent implements OnInit {
   loading=true;
   isAllTours = false;
 
-  constructor(private tourService: ToursService, private authService: AuthService, private snackBar:MatSnackBar,private router: Router){}
+  constructor(private tourService: ToursService,private cartService: CartService, private authService: AuthService, private snackBar:MatSnackBar,private router: Router){}
 
-  
+  loggedUser = this.authService.getCurrentUser();
+  purchasedTourIds: string[] = [];
+  cartTourIds: string[] = [];
 
   ngOnInit(): void {
     const user = this.authService.getCurrentUser();
@@ -40,6 +43,9 @@ export class ToursListComponent implements OnInit {
     } else {
       this.loadMyTours(user.userId);
     }
+
+    this.loadCartTours(user.userId.toString());
+    this.loadPurchasedTours(user.userId.toString());
   }
   loadMyTours(userId: number): void {
     this.tourService.getAllTours().subscribe({
@@ -115,4 +121,48 @@ loadAllTours(): void {
     error: (err) => console.error(err)
   });
 }
+
+ addToCart(tour: any) {
+    const userId = this.loggedUser?.userId.toString(); // kasnije povuci iz AuthService ili LocalStorage
+
+    if(userId)
+    this.cartService.addToCart(userId, tour).subscribe({
+      next: (res) => {
+        console.log('Tour added to cart', res);
+        alert(`Tour "${tour.name}" added to cart!`);
+        if (tour.id && !this.cartTourIds.includes(tour.id)) {
+          this.cartTourIds.push(tour.id);
+        }
+      },
+      error: (err) => {
+        console.error('Error adding tour to cart', err);
+        alert('Failed to add tour to cart.');
+      }
+    });
+  }
+  loadCartTours(userId: string) {
+    this.cartService.getCart(userId).subscribe({
+      next: (res) => {
+        this.cartTourIds = res.items.map((i: any) => i.tourId);
+      }
+    });
+  }
+
+  loadPurchasedTours(userId: string) {
+    this.cartService.getPurchasedTours(userId).subscribe({
+      next: (tokens) => {
+        this.purchasedTourIds = tokens.map((t: any) => t.tourId);
+      }
+    });
+  }
+
+  isDisabled(tourId: string): boolean {
+    return (
+      this.cartTourIds.includes(tourId) ||
+      this.purchasedTourIds.includes(tourId)
+    );
+  }
+  isLoggedTourist(): boolean{
+    return this.loggedUser?.role===1
+  }
 }

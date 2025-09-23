@@ -8,13 +8,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// Ručni CORS middleware
+// CORS middleware (ako ti treba za Angular na :4200)
 func withCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Obriši sve eventualne duple vrednosti
-		w.Header().Del("Access-Control-Allow-Origin")
-
-		// Postavi samo jedan
 		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:4200")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
@@ -28,24 +24,34 @@ func withCORS(next http.Handler) http.Handler {
 	})
 }
 
-func startServer(handler *handler.GatewayHandler) {
+func main() {
 	router := mux.NewRouter()
 
-	// tvoje rute
-	router.PathPrefix("/blogs").HandlerFunc(handler.HandleBlog)
-	router.PathPrefix("/users").HandlerFunc(handler.HandleStakeholders)
-	router.PathPrefix("/followers").HandlerFunc(handler.HandleFollowers)
-	router.PathPrefix("/tours").HandlerFunc(handler.HandleTours)
-	router.PathPrefix("/reviews").HandlerFunc(handler.HandleReviews)
-	router.PathPrefix("/keypoints").HandlerFunc(handler.HandleKeypoints)
-	router.PathPrefix("/position").HandlerFunc(handler.HandlePosition)
-	router.PathPrefix("/tour-executions").HandlerFunc(handler.HandleTourExecutions)
+	// Handleri
+	grpcHandler := &handler.GrpcHandler{}
+	gatewayHandler := &handler.GatewayHandler{}
 
-	log.Println("Gateway started on :8070")
+	// --- Blog rute preko gRPC ---
+
+	router.HandleFunc("/blogs/all", grpcHandler.GetAllBlogs).Methods("GET")
+	router.HandleFunc("/blogs/{id}", grpcHandler.GetBlog).Methods("GET")
+	router.HandleFunc("/blogs", grpcHandler.CreateBlog).Methods("POST")
+	router.HandleFunc("/blogs/{id}", grpcHandler.UpdateBlog).Methods("PUT")
+
+	// --- Ostale blog rute (komentari, slike, lajkovi...) ostaju preko proxy-ja ---
+	router.PathPrefix("/blogs").HandlerFunc(gatewayHandler.HandleBlog)
+
+	// --- Ostali servisi i dalje preko proxy-ja ---
+	router.PathPrefix("/users").HandlerFunc(gatewayHandler.HandleStakeholders)
+	router.PathPrefix("/followers").HandlerFunc(gatewayHandler.HandleFollowers)
+	router.PathPrefix("/tours").HandlerFunc(gatewayHandler.HandleTours)
+	router.PathPrefix("/reviews").HandlerFunc(gatewayHandler.HandleReviews)
+	router.PathPrefix("/keypoints").HandlerFunc(gatewayHandler.HandleKeypoints)
+	router.PathPrefix("/position").HandlerFunc(gatewayHandler.HandlePosition)
+	router.PathPrefix("/tour-executions").HandlerFunc(gatewayHandler.HandleTourExecutions)
+	router.PathPrefix("/purchase").HandlerFunc(gatewayHandler.HandlePurchase)
+
+	// Pokreni Gateway
+	log.Println("API Gateway started on :8070")
 	log.Fatal(http.ListenAndServe(":8070", withCORS(router)))
-}
-
-func main() {
-	h := &handler.GatewayHandler{}
-	startServer(h)
 }

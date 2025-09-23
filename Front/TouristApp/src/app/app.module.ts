@@ -13,7 +13,9 @@ import { StakeholdersModule } from './stakeholders/stakeholders.module';
 import { UserAccountsComponent } from './stakeholders/user-accounts/user-accounts.component';
 import { ToursModule } from './tours/tours.module';
 import { BlogsModule } from './blogs/blogs.module';
+import { CartModule } from './cart/cart.module';
 import { FollowersModule } from './followers/followers.module';
+import { MatTableModule } from '@angular/material/table';
 
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './auth/interceptor-jwt/auth.interceptor';
@@ -30,6 +32,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
     BrowserModule,
     AppRoutingModule,
     AuthModule,
+    MatTableModule,
     HttpClientModule,
     BrowserAnimationsModule,
     MatSnackBarModule,
@@ -39,7 +42,8 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
     ToursModule,
     BlogsModule,
     FollowersModule,
-    MatProgressBarModule
+    MatProgressBarModule,
+    CartModule
 
   ],
   providers: [

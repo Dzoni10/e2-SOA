@@ -6,11 +6,16 @@ import (
 	"blogs/logger"
 	"blogs/repo"
 	"blogs/service"
+	pb "local/common/proto/blogpb"
+	"local/common/saga/events"
+	"log"
+	"net"
 	"net/http"
 	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -25,9 +30,17 @@ func main() {
 	database.Init()
 	logger.Info("Database initialized successfully")
 
+	natsURL := os.Getenv("NATS_URL")
+	if natsURL == "" {
+		natsURL = "nats://nats:4222" // default za Docker
+	}
+	natsConn, _ := events.ConnectNATS(natsURL)
+
+	publisher := &events.Publisher{Conn: natsConn}
+
 	// Blogs setup
 	blogRepo := &repo.BlogRepository{}
-	blogSrv := &service.BlogService{Repo: blogRepo}
+	blogSrv := &service.BlogService{Repo: blogRepo, Publisher: publisher}
 	blogHandler := &handler.BlogHandler{Service: blogSrv}
 	commentRepo := &repo.CommentRepository{}
 	commentSrv := &service.CommentService{Repo: commentRepo}
@@ -66,6 +79,24 @@ func main() {
 		AllowCredentials: true,
 	})
 	*/
+
+	// ----------------- gRPC Setup -----------------
+	go func() {
+		grpcListener, err := net.Listen("tcp", ":50051")
+		if err != nil {
+			log.Fatalf("Failed to listen on gRPC port: %v", err)
+		}
+
+		grpcServer := grpc.NewServer()
+		blogGrpcHandler := &handler.BlogGrpcHandler{Service: blogSrv}
+		pb.RegisterBlogServiceServer(grpcServer, blogGrpcHandler)
+
+		logger.Info("gRPC server listening on :50051")
+		if err := grpcServer.Serve(grpcListener); err != nil {
+			log.Fatalf("Failed to serve gRPC: %v", err)
+		}
+	}()
+
 	logger.Info("Blog server running", logrus.Fields{"port": "8082"})
 
 	if err := http.ListenAndServe(":8082", r); err != nil {

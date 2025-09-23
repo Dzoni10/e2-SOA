@@ -79,7 +79,7 @@ func (h *CommentHandler) canUserComment(commenterID, blogAuthorID int) (bool, er
 		followerServiceURL = "http://localhost:8083"
 	}
 
-	url := fmt.Sprintf("%s/can-comment/%d/%d", followerServiceURL, commenterID, blogAuthorID)
+	url := fmt.Sprintf("%s/followers/can-comment/%d/%d", followerServiceURL, commenterID, blogAuthorID)
 	log.Printf("Calling follower service: %s", url) // Debug log
 
 	resp, err := http.Get(url)

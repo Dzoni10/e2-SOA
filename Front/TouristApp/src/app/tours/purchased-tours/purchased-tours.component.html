@@ -1,0 +1,72 @@
+<div class="container" *ngIf="!loading; else loader">
+  <mat-grid-list cols="4" rowHeight="1:1" gutterSize="20" class="grid">
+    <mat-grid-tile *ngFor="let item of toursWithKeypoints">
+      <mat-card class="tour-card">
+        <mat-card-header>
+          <mat-card-title>{{ item.tour.name }}</mat-card-title>
+          <mat-card-subtitle>#{{ item.tour.tags }}</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <p><strong>Difficulty:</strong> {{ item.tour.difficulty }}</p>
+          <p><strong>Description:</strong> {{ item.tour.description }}</p>
+          <p><strong>Status:</strong> {{ item.tour.status }}</p>
+          <p><strong>Cost:</strong> {{ item.tour.cost }}</p>
+          <p><strong>Length:</strong> {{ item.tour.tourLength | number:'1.2-2' }} km</p>
+
+          <div class="transport-times">
+            <span class="transport-item">
+              <mat-icon>directions_walk</mat-icon>
+              {{ item.tour.walkingTime || 0 }}min
+            </span>
+            <span class="transport-item">
+              <mat-icon>directions_bike</mat-icon>
+              {{ item.tour.bicycleTime || 0 }}min
+            </span>
+            <span class="transport-item">
+              <mat-icon>directions_car</mat-icon>
+              {{ item.tour.carTime || 0 }}min
+            </span>
+          </div>
+
+          <div class="keypoint-info">
+            <h3>Key points 1:</h3>
+            <p *ngIf="item.firstKeypoint">
+              <strong>Name:</strong> {{ item.firstKeypoint.name }}
+            </p>
+            <p *ngIf="item.firstKeypoint">
+              <strong>Description:</strong> {{ item.firstKeypoint.description }}
+            </p>
+            <p *ngIf="!item.firstKeypoint"><strong>Starts at:</strong> No keypoints</p>
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions>
+          <button mat-raised-button color="primary" (click)="seeReview(item.tour.id)">
+            See Reviews
+          </button>
+        </mat-card-actions>
+
+        <mat-card-actions>
+          <button mat-raised-button color="primary" (click)="addReview(item.tour.id)">
+            Add Review
+          </button>
+        </mat-card-actions>
+
+        <mat-card-actions>
+          <button mat-raised-button color="accent" (click)="startTour(item.tour)">
+            Start Tour
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </mat-grid-tile>
+  </mat-grid-list>
+</div>
+
+<ng-template #loader>
+  <div class="loader">Loading purchased tours...</div>
+</ng-template>
+
+<ng-template #noTours>
+  <div class="no-data">You haven't purchased any tours yet</div>
+</ng-template>

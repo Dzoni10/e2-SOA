@@ -1,0 +1,67 @@
+.container {
+  padding: 40px;
+}
+
+.grid {
+  @media (max-width: 1024px) {
+    mat-grid-list {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 600px) {
+    mat-grid-list {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+.tour-card {
+height: 700px;
+  background: linear-gradient(135deg, #9e58b1, #2575fc);
+  color: white;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  transition: transform 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+}
+
+.loader, .no-data {
+  text-align: center;
+  padding: 30px;
+  font-size: 1.2rem;
+  color: gray;
+}
+.transport-times {
+  display: flex;
+  gap: 10px;
+  margin: 8px 0;
+  align-items: center;
+}
+
+.transport-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85em;
+}
+
+.transport-item mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.keypoint-info {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.2);
+}
+
+.keypoint-desc {
+  font-style: italic;
+  opacity: 0.8;
+}
