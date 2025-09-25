@@ -152,8 +152,7 @@ services:
       NATS_URL: nats://nats:4222
       JAEGER_ENDPOINT: http://jaeger:14268/api/traces
     depends_on:
-      neo4j:
-          condition:  service_healthy
+      - neo4j
       - nats
     networks:
       - follower-net
